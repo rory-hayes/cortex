@@ -1,0 +1,36 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "reportId": "report-001",
+  "workspaceId": "workspace-001",
+  "repoId": "repo-001",
+  "scanId": "scan-001",
+  "overallScore": 70,
+  "categoryScores": {
+    "product_clarity": 76,
+    "agent_readiness": 82,
+    "architecture": 74,
+    "backlog_quality": 68,
+    "validation": 58,
+    "ci_cd": 63,
+    "security": 71,
+    "repo_hygiene": 79,
+    "execution_risk": 61,
+    "integration": 66
+  },
+  "summary": "The repository is close to planning-ready but needs validation and policy setup.",
+  "strengths": ["Architecture notes and runner safety conventions are documented."],
+  "weaknesses": [
+    {
+      "safeSummary": "Only report metadata is allowed.",
+      "nested": {
+        "fileContent": "placeholder value"
+      }
+    }
+  ],
+  "blockedReasons": ["Local execution should wait for explicit validation commands."],
+  "recommendedNextActions": ["Add validation command metadata."],
+  "findingIds": ["finding-validation-001"],
+  "taskRecommendationIds": ["task-recommendation-validation-001"],
+  "executionReadiness": "setup_required",
+  "generatedAt": "2026-05-25T10:15:00.000Z"
+}

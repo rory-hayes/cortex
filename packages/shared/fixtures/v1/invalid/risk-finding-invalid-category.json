@@ -1,0 +1,7 @@
+{
+  "id": "risk-invalid-category-1",
+  "severity": "blocked",
+  "category": "raw_source",
+  "message": "Invalid risk category should fail.",
+  "paths": ["packages/shared/src/index.ts"]
+}

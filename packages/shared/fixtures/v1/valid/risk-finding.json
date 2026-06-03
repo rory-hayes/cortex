@@ -1,0 +1,7 @@
+{
+  "id": "risk-package-lock-1",
+  "severity": "warning",
+  "category": "package_lock",
+  "message": "Package lock changed.",
+  "paths": ["pnpm-lock.yaml"]
+}

@@ -1,0 +1,52 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "scanId": "repo-scan-001",
+  "workspaceId": "workspace-001",
+  "repoId": "repo-001",
+  "status": "dry_run_running",
+  "statusSummary": "Repository scan completed with metadata-only inventory summaries.",
+  "inventory": {
+    "totalFileCount": 48,
+    "scannedFileCount": 44,
+    "omittedFileCount": 4,
+    "totalDirectoryCount": 12,
+    "languageSummaries": [
+      {
+        "name": "TypeScript",
+        "fileCount": 36
+      },
+      {
+        "name": "Markdown",
+        "fileCount": 8
+      }
+    ],
+    "packageManagerLabels": ["pnpm"],
+    "ciProviderLabels": ["GitHub Actions"],
+    "documentationSummaries": [
+      {
+        "kind": "readme",
+        "present": true,
+        "pathCount": 1
+      },
+      {
+        "kind": "architecture",
+        "present": true,
+        "pathCount": 2
+      }
+    ],
+    "policySummary": {
+      "hasPolicyFile": true,
+      "protectedPathCount": 3,
+      "sensitivePathCount": 2,
+      "validationCommandCount": 4,
+      "dryRunCheckCount": 11
+    }
+  },
+  "findingIds": ["finding-validation-001", "finding-security-001"],
+  "taskRecommendationIds": ["task-recommendation-validation-001"],
+  "readinessReportId": "readiness-report-001",
+  "createdAt": "2026-05-25T12:00:00.000Z",
+  "startedAt": "2026-05-25T12:01:00.000Z",
+  "finishedAt": "2026-05-25T12:02:00.000Z",
+  "updatedAt": "2026-05-25T12:02:00.000Z"
+}

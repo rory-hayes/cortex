@@ -1,0 +1,8 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "jobId": "job-task-022",
+  "runId": "run-task-022",
+  "status": "claimed",
+  "claimedByRunnerId": "runner-1",
+  "claimExpiresAt": "2026-05-19T19:02:30.000Z"
+}

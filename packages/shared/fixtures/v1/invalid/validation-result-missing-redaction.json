@@ -1,0 +1,15 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "id": "validation-result-missing-redaction-1",
+  "runId": "run-task-022",
+  "commandId": "shared-test",
+  "commandLabel": "Run shared package tests",
+  "command": "pnpm --filter @control-plane/shared test",
+  "status": "passed",
+  "exitCode": 0,
+  "durationMs": 1250,
+  "stdoutSummary": "Shared package tests passed with fixture validation.",
+  "stderrSummary": "",
+  "startedAt": "2026-05-19T19:00:00.000Z",
+  "finishedAt": "2026-05-19T19:00:02.000Z"
+}

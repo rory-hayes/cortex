@@ -1,0 +1,50 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "taskId": "cortex-task-001",
+  "workspaceId": "workspace-001",
+  "repoId": "repo-001",
+  "origin": {
+    "type": "finding"
+  },
+  "title": "Add validation command metadata",
+  "objective": "Add metadata-only validation command configuration before local runner execution.",
+  "acceptanceCriteria": [
+    "Validation command metadata is represented without shell command text.",
+    "Repo readiness can link the task to the originating finding."
+  ],
+  "riskLevel": "medium",
+  "executionMode": "setup_pr",
+  "status": "approved",
+  "approvalStatus": "approved",
+  "suggestedValidation": [
+    {
+      "validationId": "validation:typecheck",
+      "label": "TypeScript typecheck",
+      "required": true
+    }
+  ],
+  "findingIds": ["finding-validation-001"],
+  "taskRecommendationId": "task-recommendation-validation-001",
+  "taskPacketId": "task-packet-001",
+  "runIds": ["run-001", "run-002"],
+  "latestRunId": "run-002",
+  "prArtifactIds": ["pr-artifact-001"],
+  "externalLinks": [
+    {
+      "provider": "github",
+      "resourceType": "github_issue",
+      "externalId": "42",
+      "url": "https://github.com/example/repo/issues/42",
+      "title": "GitHub issue 42",
+      "status": "open",
+      "syncedAt": "2026-05-25T11:01:00.000Z"
+    }
+  ],
+  "metadata": {
+    "readinessScoreAtCreation": 70,
+    "category": "validation",
+    "labels": ["repo-readiness", "setup"]
+  },
+  "createdAt": "2026-05-25T11:00:00.000Z",
+  "updatedAt": "2026-05-25T11:05:00.000Z"
+}

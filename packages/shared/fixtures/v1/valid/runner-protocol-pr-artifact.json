@@ -1,0 +1,28 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "id": "pr-artifact-task-022",
+  "runId": "run-task-022",
+  "repository": {
+    "owner": "control-plane",
+    "name": "ai-engineering-control-plane"
+  },
+  "branchName": "codex/TASK-022-add-json-fixtures-for-contracts",
+  "prNumber": 22,
+  "prUrl": "https://example.test/control-plane/ai-engineering-control-plane/pull/22",
+  "prTitle": "TASK-022 Add JSON fixtures for contracts",
+  "prStatus": "open",
+  "changedFilePaths": [
+    "packages/shared/src/fixtures.test.ts",
+    "packages/shared/fixtures/v1/valid/task-packet.json"
+  ],
+  "riskFindings": [
+    {
+      "id": "risk-package-lock-1",
+      "severity": "warning",
+      "category": "package_lock",
+      "message": "Package lock changed.",
+      "paths": ["pnpm-lock.yaml"]
+    }
+  ],
+  "createdAt": "2026-05-19T19:02:00.000Z"
+}

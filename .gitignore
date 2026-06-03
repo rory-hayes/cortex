@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+
+# OS and editor files
+.DS_Store
+
+# Environment files
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Build output and local caches
+dist/
+build/
+coverage/
+.turbo/
+.next/
+.vite/
+.vitest/
+.cache/
+.eslintcache
+*.tsbuildinfo
+playwright-report/
+test-results/
+
+# Runner-local state and artifacts
+apps/runner/.runner-state
+runs/*
+!runs/.gitkeep
+.codex-runner-worktrees/
+.codex-runner.lock
+
+# Fixture-generated repositories and temp output
+fixtures/**/tmp/
+fixtures/**/.tmp/
+fixtures/**/temp/
+.vercel

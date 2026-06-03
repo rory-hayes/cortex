@@ -1,0 +1,44 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "id": "dry-run-result-unsafe-metadata-1",
+  "runId": "run-task-022",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "repo_clean",
+      "label": "Repo clean",
+      "status": "passed",
+      "message": "Repository has no uncommitted changes before execution.",
+      "metadata": {
+        "checkedAt": "2026-05-19T18:56:00.000Z",
+        "nested": {
+          "content": "[REDACTED_SOURCE_PAYLOAD]"
+        }
+      }
+    }
+  ],
+  "capabilities": {
+    "contractVersion": "2026-05-10.v1",
+    "runnerId": "runner-1",
+    "os": {
+      "platform": "darwin",
+      "release": "25.5.0",
+      "arch": "arm64"
+    },
+    "shell": "/bin/zsh",
+    "tools": {
+      "git": {
+        "available": true,
+        "version": "2.49.0",
+        "path": "/usr/bin/git"
+      }
+    },
+    "maxConcurrentJobs": 1,
+    "supportsDryRun": true,
+    "supportsCancellation": true,
+    "reportedAt": "2026-05-19T18:54:00.000Z"
+  },
+  "blockers": [],
+  "warnings": [],
+  "createdAt": "2026-05-19T18:57:00.000Z"
+}

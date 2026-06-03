@@ -1,0 +1,27 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "taskRecommendationId": "task-recommendation-no-finding-001",
+  "workspaceId": "workspace-001",
+  "repoId": "repo-001",
+  "scanId": "repo-scan-001",
+  "title": "Add validation command metadata",
+  "objective": "Represent validation setup work as a safe metadata-only recommendation.",
+  "findingIds": [],
+  "acceptanceCriteria": ["Recommendation links to the validation readiness finding."],
+  "riskLevel": "medium",
+  "effort": "small",
+  "executionMode": "setup_pr",
+  "suggestedValidation": [
+    {
+      "validationId": "validation:typecheck",
+      "label": "TypeScript typecheck",
+      "required": true
+    }
+  ],
+  "status": "open",
+  "metadata": {
+    "readinessCategory": "validation"
+  },
+  "createdAt": "2026-05-25T12:10:00.000Z",
+  "updatedAt": "2026-05-25T12:10:00.000Z"
+}

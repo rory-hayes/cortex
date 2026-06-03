@@ -1,0 +1,17 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "id": "event-worktree-created-1",
+  "idempotencyKey": "run:run-task-022:event:worktree_created:1",
+  "runId": "run-task-022",
+  "runnerId": "runner-1",
+  "state": "worktree_created",
+  "severity": "info",
+  "message": "Worktree created.",
+  "metadata": {
+    "changedFilePaths": ["packages/shared/src/fixtures.test.ts"],
+    "riskFlags": [],
+    "validationStatus": "pending",
+    "attempt": 1
+  },
+  "createdAt": "2026-05-19T18:55:00.000Z"
+}

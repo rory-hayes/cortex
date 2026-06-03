@@ -1,0 +1,10 @@
+node_modules
+dist
+build
+coverage
+.next
+**/.next
+runs
+.pnpm-store
+.codex-runner-worktrees
+packages/policies/fixtures/invalid-json-policy.json

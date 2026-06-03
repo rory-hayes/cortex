@@ -1,0 +1,2 @@
+export const DEFAULT_REPAIR_MAX_ATTEMPTS = 2;
+export const REPAIR_FEEDBACK_MAX_LENGTH = 2_000;

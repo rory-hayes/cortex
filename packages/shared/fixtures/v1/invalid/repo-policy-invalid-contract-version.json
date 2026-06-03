@@ -1,0 +1,27 @@
+{
+  "contractVersion": "2026-05-10.v0",
+  "protectedBranches": ["main"],
+  "protectedPaths": ["SECURITY_MODEL.md", ".github/workflows/**"],
+  "sensitivePaths": [".env", ".env.*", "secrets/**"],
+  "warningPaths": {
+    "packageLocks": ["pnpm-lock.yaml", "package-lock.json", "yarn.lock"],
+    "migrations": ["db/migrations/**"],
+    "infrastructure": [".github/**", "infra/**"],
+    "auth": ["apps/web/src/auth/**"],
+    "billing": ["apps/web/src/billing/**"]
+  },
+  "validationCommands": [
+    {
+      "id": "shared-test",
+      "label": "Run shared package tests",
+      "command": "pnpm --filter @control-plane/shared test",
+      "cwd": "packages/shared",
+      "timeoutSeconds": 120,
+      "required": true
+    }
+  ],
+  "maxChangedFiles": 25,
+  "maxDiffLines": 1000,
+  "allowUntrackedFiles": false,
+  "dryRunChecks": ["repo_path_exists", "git_repository", "repo_clean"]
+}

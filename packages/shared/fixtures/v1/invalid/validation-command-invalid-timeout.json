@@ -1,0 +1,8 @@
+{
+  "id": "shared-test",
+  "label": "Run shared package tests",
+  "command": "pnpm --filter @control-plane/shared test",
+  "cwd": "packages/shared",
+  "timeoutSeconds": 0,
+  "required": true
+}

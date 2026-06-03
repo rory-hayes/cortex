@@ -1,0 +1,35 @@
+{
+  "name": "ai-engineering-control-plane",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r --if-present --filter './apps/*' --filter './packages/*' run build",
+    "codex-runner": "tsx scripts/codex-runner/index.ts",
+    "codex-runner-dashboard": "tsx scripts/codex-runner/dashboard.ts",
+    "format:check": "prettier --check \"package.json\" \"pnpm-workspace.yaml\" \"tsconfig*.json\" \"eslint.config.js\" \"vitest.config.ts\" \".prettierrc\" \"apps/**/*.{js,mjs,cjs,ts,tsx,json,yaml,yml}\" \"packages/**/*.{js,mjs,cjs,ts,tsx,json,yaml,yml}\" \"scripts/**/*.{js,mjs,cjs,ts,tsx,json,yaml,yml}\"",
+    "lint": "eslint \"**/*.{js,mjs,cjs,ts,tsx}\" --no-error-on-unmatched-pattern",
+    "production-runtime:check": "tsx scripts/check-production-runtime.ts",
+    "production-smoke:check": "tsx scripts/check-production-smoke.ts",
+    "release-readiness:check": "tsx scripts/check-release-readiness.ts",
+    "supabase-db:check": "tsx scripts/check-supabase-db.ts",
+    "supabase-link:check": "tsx scripts/check-supabase-link.ts",
+    "supabase-migrations:check": "tsx scripts/check-supabase-migrations.ts",
+    "supabase-smoke:check": "tsx scripts/check-supabase-smoke.ts",
+    "vercel-production-env:check": "tsx scripts/check-vercel-production-env.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit && pnpm -r --if-present --filter './apps/*' --filter './packages/*' run typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.4",
+    "@types/node": "^25.7.0",
+    "eslint": "9.39.4",
+    "globals": "16.4.0",
+    "prettier": "3.8.1",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "8.59.2",
+    "vitest": "^4.1.6"
+  }
+}

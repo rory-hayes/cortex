@@ -1,0 +1,30 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "protectedBranches": ["main", "release/*"],
+  "protectedPaths": [".github/**", "infra/prod/**"],
+  "sensitivePaths": [".env", ".env.*", "config/*.local"],
+  "warningPaths": {
+    "packageLocks": ["pnpm-lock.yaml", "package-lock.json"],
+    "migrations": ["db/migrations/**"],
+    "infrastructure": ["infra/**"],
+    "auth": ["apps/web/src/auth/**"],
+    "billing": ["apps/web/src/billing/**"]
+  },
+  "validationCommands": [
+    {
+      "id": "policy-sensitive-path-test",
+      "label": "Policy sensitive path tests",
+      "command": "pnpm --filter @control-plane/policies test",
+      "timeoutSeconds": 120,
+      "required": true
+    }
+  ],
+  "maxChangedFiles": 25,
+  "maxDiffLines": 500,
+  "allowUntrackedFiles": false,
+  "dryRunChecks": [
+    "repo_policy_exists_and_parses",
+    "validation_commands_configured",
+    "protected_and_sensitive_paths_configured"
+  ]
+}

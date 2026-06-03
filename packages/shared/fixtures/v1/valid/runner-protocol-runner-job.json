@@ -1,0 +1,76 @@
+{
+  "contractVersion": "2026-05-10.v1",
+  "jobId": "job-task-022",
+  "runId": "run-task-022",
+  "type": "task",
+  "taskPacket": {
+    "contractVersion": "2026-05-10.v1",
+    "id": "task-packet-task-022",
+    "workspaceId": "workspace-1",
+    "repositoryId": "repo-1",
+    "runId": "run-task-022",
+    "mode": "execute",
+    "objective": "Add canonical JSON fixtures for shared contracts.",
+    "acceptanceCriteria": [
+      "Valid fixtures parse with shared schemas.",
+      "Invalid fixtures fail for their expected issue paths."
+    ],
+    "source": {
+      "type": "manual",
+      "externalId": "manual-task-022",
+      "title": "Add JSON fixtures for contracts",
+      "url": "https://example.test/tasks/task-022"
+    },
+    "repo": {
+      "localPath": "/repos/control-plane",
+      "defaultBranch": "main",
+      "targetBranch": "codex/TASK-022-add-json-fixtures-for-contracts",
+      "worktreePath": "/tmp/control-plane-task-022"
+    },
+    "context": {
+      "files": ["DATA_MODEL.md", "RUNNER_PROTOCOL.md", "packages/shared/src/index.ts"],
+      "notes": ["Use path references only.", "Keep web-bound fixtures metadata-only."]
+    },
+    "policy": {
+      "contractVersion": "2026-05-10.v1",
+      "protectedBranches": ["main"],
+      "protectedPaths": ["SECURITY_MODEL.md", ".github/workflows/**"],
+      "sensitivePaths": [".env", ".env.*", "secrets/**"],
+      "warningPaths": {
+        "packageLocks": ["pnpm-lock.yaml", "package-lock.json", "yarn.lock"],
+        "migrations": ["db/migrations/**"],
+        "infrastructure": [".github/**", "infra/**"],
+        "auth": ["apps/web/src/auth/**"],
+        "billing": ["apps/web/src/billing/**"]
+      },
+      "validationCommands": [
+        {
+          "id": "shared-test",
+          "label": "Run shared package tests",
+          "command": "pnpm --filter @control-plane/shared test",
+          "cwd": "packages/shared",
+          "timeoutSeconds": 120,
+          "required": true
+        }
+      ],
+      "maxChangedFiles": 25,
+      "maxDiffLines": 1000,
+      "allowUntrackedFiles": false,
+      "dryRunChecks": ["repo_path_exists", "git_repository", "repo_clean"]
+    },
+    "validation": {
+      "commands": [
+        {
+          "id": "shared-test",
+          "label": "Run shared package tests",
+          "command": "pnpm --filter @control-plane/shared test",
+          "cwd": "packages/shared",
+          "timeoutSeconds": 120,
+          "required": true
+        }
+      ]
+    },
+    "createdAt": "2026-05-19T18:52:18.410Z"
+  },
+  "queuedAt": "2026-05-19T18:52:30.000Z"
+}
