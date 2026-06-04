@@ -46,8 +46,13 @@ secrets, response bodies, local paths, and raw provider output.
 - Direct Supabase database check: ready through the server-side Postgres client fallback.
 - Vercel production env-name check: Auth0 and `DATABASE_URL` configured; GitHub App runtime
   credentials missing.
+- Production deploy: `vercel --prod --yes` completed and aliased the deployment to the stable
+  production URL.
 - Production route smoke: ready for public route, Auth0 sign-up redirect, and protected route
   missing-config regression.
+- Browser smoke: the production homepage renders as `AI Engineering Control Plane`, exposes
+  sign-in/sign-up links, and the sign-up path redirects to the configured Auth0 tenant's signup
+  screen. The dashboard return target is validated by the HTTP smoke check.
 - Combined release-readiness gate: blocked only by required GitHub App runtime credentials,
   with optional Linear warnings.
 - Repository validation: `pnpm run typecheck`, `pnpm run lint`, `pnpm run format:check`, and
