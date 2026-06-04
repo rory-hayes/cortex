@@ -82,6 +82,10 @@ printing secret values:
   apply only missing required variables from the shell. The command refuses placeholders,
   sends values to the Vercel CLI through stdin, and prints only variable names and statuses,
   never environment values.
+- When only one recovered required value is available, such as after replacing a Supabase
+  project, run `pnpm vercel-production-env:apply --key DATABASE_URL --dry-run` and then
+  `pnpm vercel-production-env:apply --key DATABASE_URL` to apply only that key without
+  requiring unrelated missing credentials to be loaded in the shell.
 - Run `pnpm production-runtime:check` in an environment that has the production values
   loaded. The command prints only variable names, statuses, and safe messages. Use
   `pnpm production-runtime:check --json` when automation needs structured output.
@@ -100,9 +104,10 @@ printing secret values:
   project refs, passwords, API keys, or local paths. This command reports whether the
   linked database is missing a package migration, but it does not apply migrations.
 - Run `pnpm supabase-db:check` after loading the real `DATABASE_URL` in the shell to verify
-  direct Postgres connectivity with a single `psql` query. The command uses the database
-  URL only from the environment and prints only statuses, never database URLs, passwords,
-  hosts, query output, or raw `psql` errors.
+  direct Postgres connectivity with a single query. The command uses `psql` when available
+  and falls back to the server-side Node Postgres client already used by the app. It reads
+  the database URL only from the environment and prints only statuses, never database URLs,
+  passwords, hosts, query output, or raw database client errors.
 - Run `pnpm supabase-smoke:check --url <supabase-project-url-or-rest-url>` to verify
   Supabase REST/Auth endpoint reachability without printing response bodies, API keys, or
   the project ref. The command treats API-authenticated REST responses as reachable and

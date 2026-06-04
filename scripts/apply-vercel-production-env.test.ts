@@ -41,33 +41,47 @@ describe("Vercel production env apply command", () => {
       dryRun: false,
       help: false,
       json: false,
+      keys: [],
     });
     expect(parseApplyVercelProductionEnvArgs(["--dry-run", "--json"])).toEqual({
       allRequired: false,
       dryRun: true,
       help: false,
       json: true,
+      keys: [],
     });
     expect(parseApplyVercelProductionEnvArgs(["--all-required"])).toEqual({
       allRequired: true,
       dryRun: false,
       help: false,
       json: false,
+      keys: [],
+    });
+    expect(parseApplyVercelProductionEnvArgs(["--key", "DATABASE_URL"])).toEqual({
+      allRequired: false,
+      dryRun: false,
+      help: false,
+      json: false,
+      keys: ["DATABASE_URL"],
     });
     expect(parseApplyVercelProductionEnvArgs(["--help"])).toEqual({
       allRequired: false,
       dryRun: false,
       help: true,
       json: false,
+      keys: [],
     });
     expect(() => parseApplyVercelProductionEnvArgs(["--environment", "production"])).toThrow(
       /Unknown argument/,
     );
+    expect(() =>
+      parseApplyVercelProductionEnvArgs(["--key", "LINEAR_OAUTH_TOKEN_ENCRYPTION_KEY"]),
+    ).toThrow(/required production runtime key/);
   });
 
   test("dry-runs only required keys missing from Vercel production without printing values", async () => {
     const result = await applyVercelProductionEnv(
-      { allRequired: false, dryRun: true, help: false, json: false },
+      { allRequired: false, dryRun: true, help: false, json: false, keys: [] },
       {
         env: validEnv,
         execVercelEnvList: async () =>
@@ -99,7 +113,7 @@ describe("Vercel production env apply command", () => {
 
   test("blocks before writing when a required shell value is missing or placeholder-like", async () => {
     const result = await applyVercelProductionEnv(
-      { allRequired: false, dryRun: false, help: false, json: false },
+      { allRequired: false, dryRun: false, help: false, json: false, keys: [] },
       {
         env: {
           ...validEnv,
@@ -128,6 +142,36 @@ describe("Vercel production env apply command", () => {
     expect(output).toContain("GITHUB_APP_PRIVATE_KEY");
     expect(output).not.toContain("<remote-db-password-placeholder>");
     expect(output).not.toContain("postgresql://db-user");
+  });
+
+  test("applies a selected required key without requiring other missing values", async () => {
+    const calls: Array<{ key: string; sensitive: boolean; value: string }> = [];
+    const result = await applyVercelProductionEnv(
+      { allRequired: false, dryRun: false, help: false, json: false, keys: ["DATABASE_URL"] },
+      {
+        env: {
+          DATABASE_URL: realishDatabaseUrl,
+        },
+        execVercelEnvAdd: async (input) => {
+          calls.push(input);
+        },
+        execVercelEnvList: async () => makeVercelEnvList(["WEB_BASE_URL"]),
+      },
+    );
+    const output = formatApplyVercelProductionEnvResult(result);
+
+    expect(result.ready).toBe(true);
+    expect(result.targetKeys).toEqual(["DATABASE_URL"]);
+    expect(calls).toEqual([
+      {
+        key: "DATABASE_URL",
+        sensitive: true,
+        value: realishDatabaseUrl,
+      },
+    ]);
+    expect(output).toContain("[applied] DATABASE_URL");
+    expect(output).not.toContain("GITHUB_APP_PRIVATE_KEY");
+    expect(output).not.toContain(realishDatabaseUrl);
   });
 
   test("applies validated missing values through injected Vercel calls without outputting values", async () => {
@@ -180,7 +224,7 @@ describe("Vercel production env apply command", () => {
 
   test("does nothing when all required Vercel production names are already configured", async () => {
     const result = await applyVercelProductionEnv(
-      { allRequired: false, dryRun: false, help: false, json: false },
+      { allRequired: false, dryRun: false, help: false, json: false, keys: [] },
       {
         env: validEnv,
         execVercelEnvAdd: async () => {

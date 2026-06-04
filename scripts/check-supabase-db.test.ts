@@ -65,9 +65,13 @@ describe("Supabase direct database readiness check", () => {
       readonly args: readonly string[];
       readonly env: Readonly<Record<string, string>>;
     }> = [];
+    let fallbackCalls = 0;
     const result = await runSupabaseDatabaseReadiness({
       env: {
         DATABASE_URL: validDatabaseUrl,
+      },
+      execPostgresClient: async () => {
+        fallbackCalls += 1;
       },
       execPsql: async (args, env) => {
         calls.push({ args, env });
@@ -85,11 +89,12 @@ describe("Supabase direct database readiness check", () => {
       },
       {
         message: "Direct database query completed successfully.",
-        name: "psql_connectivity",
+        name: "database_connectivity",
         status: "passed",
       },
     ]);
     expect(calls).toHaveLength(1);
+    expect(fallbackCalls).toBe(0);
     expect(calls[0]?.args.join(" ")).not.toContain(validDatabaseUrl);
     expect(calls[0]?.args).toContain("--no-psqlrc");
     expect(calls[0]?.env.PGPASSWORD).toBe("runtime-db-password");
@@ -101,10 +106,38 @@ describe("Supabase direct database readiness check", () => {
     expect(output).not.toContain("NOTICE");
   });
 
-  test("fails closed without printing raw psql errors or output", async () => {
+  test("falls back to the Node Postgres client when psql is unavailable", async () => {
+    const calls: string[] = [];
     const result = await runSupabaseDatabaseReadiness({
       env: {
         DATABASE_URL: validDatabaseUrl,
+      },
+      execPostgresClient: async (databaseUrl) => {
+        calls.push(databaseUrl);
+      },
+      execPsql: async () => {
+        throw new Error(`psql missing for ${validDatabaseUrl}`);
+      },
+    });
+    const output = formatSupabaseDatabaseReadiness(result);
+
+    expect(result.ready).toBe(true);
+    expect(calls).toEqual([validDatabaseUrl]);
+    expect(output).toContain("Supabase database readiness: ready");
+    expect(output).toContain("[passed] database_connectivity");
+    expect(output).not.toContain(validDatabaseUrl);
+    expect(output).not.toContain("runtime-db-password");
+    expect(output).not.toContain("project-ref");
+    expect(output).not.toContain("psql missing");
+  });
+
+  test("fails closed without printing raw database client errors or output", async () => {
+    const result = await runSupabaseDatabaseReadiness({
+      env: {
+        DATABASE_URL: validDatabaseUrl,
+      },
+      execPostgresClient: async () => {
+        throw new Error(`postgres failed for ${validDatabaseUrl}`);
       },
       execPsql: async () => {
         throw new Error(`psql failed for ${validDatabaseUrl}`);
@@ -113,12 +146,13 @@ describe("Supabase direct database readiness check", () => {
     const output = formatSupabaseDatabaseReadiness(result);
 
     expect(result.ready).toBe(false);
-    expect(output).toContain("[blocked] psql_connectivity");
+    expect(output).toContain("[blocked] database_connectivity");
     expect(output).toContain("Direct database query could not be completed.");
     expect(output).not.toContain(validDatabaseUrl);
     expect(output).not.toContain("runtime-db-password");
     expect(output).not.toContain("project-ref");
     expect(output).not.toContain("psql failed");
+    expect(output).not.toContain("postgres failed");
   });
 
   test("prints JSON readiness without raw database credentials", async () => {

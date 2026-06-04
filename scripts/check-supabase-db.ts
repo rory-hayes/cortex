@@ -2,11 +2,13 @@ import { execFile } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
+import { createDatabaseClient, sql } from "../packages/db/src/index.js";
+
 type SupabaseDatabaseStatus = "blocked" | "passed";
 
 type SupabaseDatabaseCheck = {
   readonly message: string;
-  readonly name: "database_url" | "psql_connectivity";
+  readonly name: "database_connectivity" | "database_url";
   readonly status: SupabaseDatabaseStatus;
 };
 
@@ -26,8 +28,11 @@ type ExecPsql = (
   readonly stdout: string;
 }>;
 
+type ExecPostgresClient = (databaseUrl: string) => Promise<void>;
+
 type SupabaseDatabaseOptions = {
   readonly env?: Readonly<Record<string, string | undefined>>;
+  readonly execPostgresClient?: ExecPostgresClient;
   readonly execPsql?: ExecPsql;
 };
 
@@ -51,7 +56,7 @@ const execFileAsync = promisify(execFile);
 const usage = `Usage: pnpm supabase-db:check [--json]
 
 Checks direct Supabase Postgres connectivity using DATABASE_URL from the environment.
-Output contains only statuses and safe messages; it never prints database URLs, passwords, hosts, query output, or raw psql errors.`;
+Output contains only statuses and safe messages; it never prints database URLs, passwords, hosts, query output, or raw database client errors.`;
 
 const psqlArgs = [
   "--no-psqlrc",
@@ -78,6 +83,16 @@ const defaultExecPsql: ExecPsql = async (args, env) => {
     stderr: String(stderr),
     stdout: String(stdout),
   };
+};
+
+const defaultExecPostgresClient: ExecPostgresClient = async (databaseUrl) => {
+  const client = createDatabaseClient(databaseUrl);
+
+  try {
+    await client.db.execute(sql`select 1 as cortex_readiness_check`);
+  } finally {
+    await client.close();
+  }
 };
 
 const isPlaceholderPassword = (password: string): boolean => {
@@ -110,7 +125,7 @@ const makeBlockedResult = (
 const buildPsqlEnv = (
   databaseUrl: string | undefined,
 ):
-  | { databaseUrl: "configured"; env: PsqlEnv }
+  | { databaseUrl: "configured"; env: PsqlEnv; url: string }
   | { databaseUrl: "configured" | "missing"; message: string } => {
   const rawValue = databaseUrl?.trim() ?? "";
 
@@ -168,7 +183,33 @@ const buildPsqlEnv = (
       PGSSLMODE: "require",
       PGUSER: user,
     },
+    url: rawValue,
   };
+};
+
+const shouldUseDefaultPostgresFallback = (options: SupabaseDatabaseOptions): boolean =>
+  options.execPsql === undefined || options.execPostgresClient !== undefined;
+
+const runConnectivityCheck = async (
+  parsed: { readonly env: PsqlEnv; readonly url: string },
+  options: SupabaseDatabaseOptions,
+): Promise<boolean> => {
+  try {
+    const result = await (options.execPsql ?? defaultExecPsql)(psqlArgs, parsed.env);
+
+    return result.stdout.trim() === "1";
+  } catch {
+    if (!shouldUseDefaultPostgresFallback(options)) {
+      return false;
+    }
+  }
+
+  try {
+    await (options.execPostgresClient ?? defaultExecPostgresClient)(parsed.url);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 export const runSupabaseDatabaseReadiness = async (
@@ -189,26 +230,18 @@ export const runSupabaseDatabaseReadiness = async (
     },
   ];
 
-  try {
-    const result = await (options.execPsql ?? defaultExecPsql)(psqlArgs, parsed.env);
+  const connected = await runConnectivityCheck(parsed, options);
 
-    if (result.stdout.trim() !== "1") {
-      checks.push({
-        message: "Direct database query returned an unexpected result.",
-        name: "psql_connectivity",
-        status: "blocked",
-      });
-    } else {
-      checks.push({
-        message: "Direct database query completed successfully.",
-        name: "psql_connectivity",
-        status: "passed",
-      });
-    }
-  } catch {
+  if (connected) {
+    checks.push({
+      message: "Direct database query completed successfully.",
+      name: "database_connectivity",
+      status: "passed",
+    });
+  } else {
     checks.push({
       message: "Direct database query could not be completed.",
-      name: "psql_connectivity",
+      name: "database_connectivity",
       status: "blocked",
     });
   }
@@ -278,6 +311,9 @@ export const runSupabaseDatabaseCheck = async (
 
   const readiness = await runSupabaseDatabaseReadiness({
     env: options.env ?? process.env,
+    ...(options.execPostgresClient === undefined
+      ? {}
+      : { execPostgresClient: options.execPostgresClient }),
     ...(options.execPsql === undefined ? {} : { execPsql: options.execPsql }),
   });
 

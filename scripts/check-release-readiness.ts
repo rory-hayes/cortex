@@ -221,7 +221,7 @@ const makeSupabaseDatabaseSection = async (
   } catch {
     return makeBlockedSection(
       "supabase_database",
-      "psql_connectivity",
+      "database_connectivity",
       "Direct database verification could not run.",
     );
   }

@@ -49,18 +49,21 @@ type ParsedArgs =
       readonly dryRun: false;
       readonly help: true;
       readonly json: false;
+      readonly keys: readonly string[];
     }
   | {
       readonly allRequired: boolean;
       readonly dryRun: boolean;
       readonly help: false;
       readonly json: boolean;
+      readonly keys: readonly string[];
     };
 
-const usage = `Usage: pnpm vercel-production-env:apply [--dry-run] [--all-required] [--json]
+const usage = `Usage: pnpm vercel-production-env:apply [--dry-run] [--all-required] [--key <required-key>] [--json]
 
 Applies required production runtime variables from the current shell to Vercel production.
 Default mode applies only required keys missing from Vercel production; --all-required overwrites every required key.
+Use --key to apply a specific required key without requiring other missing keys to be loaded in the shell.
 Output contains only variable names and statuses; it never prints values.`;
 
 const secretLikeKeys = new Set([
@@ -111,6 +114,12 @@ const getTargetKeys = async (
   parsedArgs: Extract<ParsedArgs, { help: false }>,
   options: ApplyOptions,
 ): Promise<string[]> => {
+  const keys = parsedArgs.keys ?? [];
+
+  if (keys.length > 0) {
+    return [...keys];
+  }
+
   if (parsedArgs.allRequired) {
     return requiredKeys;
   }
@@ -128,10 +137,13 @@ export const parseApplyVercelProductionEnvArgs = (argv: readonly string[]): Pars
   let allRequired = false;
   let dryRun = false;
   let json = false;
+  const keys: string[] = [];
 
-  for (const arg of argv) {
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+
     if (arg === "--help" || arg === "-h") {
-      return { allRequired: false, dryRun: false, help: true, json: false };
+      return { allRequired: false, dryRun: false, help: true, json: false, keys: [] };
     }
 
     if (arg === "--all-required") {
@@ -149,10 +161,26 @@ export const parseApplyVercelProductionEnvArgs = (argv: readonly string[]): Pars
       continue;
     }
 
+    if (arg === "--key") {
+      const value = argv[index + 1];
+
+      if (value === undefined || value.startsWith("--")) {
+        throw new Error("--key requires a required runtime key name.");
+      }
+
+      if (!requiredKeySet.has(value)) {
+        throw new Error("--key must name a required production runtime key.");
+      }
+
+      keys.push(value);
+      index += 1;
+      continue;
+    }
+
     throw new Error(`Unknown argument: ${arg}`);
   }
 
-  return { allRequired, dryRun, help: false, json };
+  return { allRequired, dryRun, help: false, json, keys: unique(keys) };
 };
 
 export const applyVercelProductionEnv = async (
