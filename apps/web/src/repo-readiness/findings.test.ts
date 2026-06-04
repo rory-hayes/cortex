@@ -1059,6 +1059,7 @@ describe("repo readiness finding service", () => {
         workspaceId: "workspace_1",
       }),
     ]);
+    expect(store.auditEvents[0]).not.toHaveProperty("taskId");
     expectNoUnsafeFindingMaterial({ audit: store.auditEvents, result, stored: store });
   });
 

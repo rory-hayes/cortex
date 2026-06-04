@@ -632,7 +632,6 @@ const buildTaskAuditEvent = (input: {
       task: input.task,
     }),
     now: () => input.now,
-    taskId: input.task.taskId,
     workspaceId: input.task.workspaceId,
   });
 

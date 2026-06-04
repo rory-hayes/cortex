@@ -945,6 +945,7 @@ describe("task recommendation service", () => {
         }),
       }),
     ]);
+    expect(store.auditEvents[0]).not.toHaveProperty("taskId");
     expectNoUnsafeRecommendationMaterial({ audit: store.auditEvents, result, stored: store });
   });
 

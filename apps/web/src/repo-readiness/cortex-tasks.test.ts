@@ -1037,10 +1037,10 @@ describe("Cortex task service", () => {
           status: "needs_review",
           taskId: "task_review",
         },
-        taskId: "task_review",
         workspaceId: "workspace_1",
       }),
     ]);
+    expect(store.auditEvents[0]).not.toHaveProperty("taskId");
     expectNoUnsafeTaskMaterial({ audit: store.auditEvents, stored: store.tasks });
   });
 
@@ -1233,10 +1233,10 @@ describe("Cortex task service", () => {
           repoId: "github_repository_1",
           taskId: "task_draft",
         },
-        taskId: "task_draft",
         workspaceId: "workspace_1",
       }),
     ]);
+    expect(store.auditEvents[0]).not.toHaveProperty("taskId");
     expectNoUnsafeTaskMaterial({ audit: store.auditEvents, stored: store.tasks });
   });
 

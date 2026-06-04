@@ -604,7 +604,6 @@ const buildTransitionAuditEvent = (input: {
       taskId: input.nextTask.taskId,
     }),
     now: () => input.now,
-    taskId: input.nextTask.taskId,
     workspaceId: input.nextTask.workspaceId,
   });
 
@@ -630,7 +629,6 @@ const buildExecutionModeAuditEvent = (input: {
       taskId: input.nextTask.taskId,
     }),
     now: () => input.now,
-    taskId: input.nextTask.taskId,
     workspaceId: input.nextTask.workspaceId,
   });
 
