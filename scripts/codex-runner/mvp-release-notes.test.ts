@@ -21,7 +21,7 @@ describe("MVP release notes", () => {
     const notes = readRepoFile("docs/MVP_RELEASE_NOTES.md");
 
     expect(notes).toContain("# Cortex MVP Release Notes");
-    expect(notes).toContain("Last updated: June 3, 2026");
+    expect(notes).toContain("Last updated: June 4, 2026");
 
     for (const section of requiredSections) {
       expect(notes).toContain(section);

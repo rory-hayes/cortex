@@ -47,6 +47,11 @@ const validEnv = {
   WEB_BASE_URL: "https://cortex.internal",
 } as const;
 
+const makeVercelEnvList = (keys: readonly string[]): string =>
+  JSON.stringify(keys.map((key) => ({ key, target: ["production"] })));
+
+const validVercelEnvList = makeVercelEnvList(Object.keys(validEnv));
+
 afterEach(async () => {
   await Promise.all(tempRoots.map((root) => rm(root, { recursive: true, force: true })));
   tempRoots.length = 0;
@@ -107,6 +112,7 @@ describe("release readiness check command", () => {
                | 0000   | 0000
                | 0001   | 0001
       `,
+      execVercelEnvList: async () => validVercelEnvList,
       fetch: (async (url) => {
         const requestUrl = String(url);
 
@@ -141,6 +147,7 @@ describe("release readiness check command", () => {
     expect(exitCode).toBe(0);
     expect(output).toContain("Release readiness: ready");
     expect(output).toContain("[ready] production_runtime");
+    expect(output).toContain("[ready] vercel_production_env");
     expect(output).toContain("[ready] production_smoke");
     expect(output).toContain("[ready] supabase_link");
     expect(output).toContain("[ready] supabase_migrations");
@@ -185,6 +192,7 @@ describe("release readiness check command", () => {
         -------|--------|------------
                | 0000   | 0000
       `,
+      execVercelEnvList: async () => makeVercelEnvList(["WEB_BASE_URL"]),
       root,
       stdout: (message) => {
         output += message;
@@ -194,6 +202,7 @@ describe("release readiness check command", () => {
     expect(exitCode).toBe(1);
     expect(output).toContain("Release readiness: blocked");
     expect(output).toContain("[blocked] production_runtime");
+    expect(output).toContain("[blocked] vercel_production_env");
     expect(output).toContain("[blocked] production_smoke");
     expect(output).toContain("[blocked] supabase_link");
     expect(output).toContain("[blocked] supabase_migrations");
@@ -220,6 +229,7 @@ describe("release readiness check command", () => {
         -------|--------|------------
                | 0000   | 0000
       `,
+      execVercelEnvList: async () => validVercelEnvList,
       fetch: (async (url) => {
         const requestUrl = String(url);
 
@@ -260,6 +270,7 @@ describe("release readiness check command", () => {
     expect(payload.sections).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "production_runtime", ready: true }),
+        expect.objectContaining({ name: "vercel_production_env", ready: true }),
         expect.objectContaining({ name: "production_smoke", ready: true }),
         expect.objectContaining({ name: "supabase_link", ready: true }),
         expect.objectContaining({ name: "supabase_migrations", ready: true }),

@@ -1,6 +1,6 @@
 # Cortex MVP Release Notes
 
-Last updated: June 3, 2026
+Last updated: June 4, 2026
 
 These notes describe the Cortex MVP release candidate after the repo-readiness refactor. Cortex now starts with a hosted GitHub repo-readiness flow, turns approved findings into Cortex Tasks, supports setup PRs for AI-readiness work, and keeps source-changing implementation behind the optional local runner.
 
@@ -22,7 +22,7 @@ Manual launch validation is still required before marketing or broader user test
 
 - Push the completed backlog state to GitHub.
 - Confirm the web app production deployment on Vercel.
-- Complete production runtime credentials for Auth0, Supabase database access, and the GitHub App.
+- Complete production runtime credentials for Supabase database access and the GitHub App.
 - Run Playwright/manual testing against `rory-hayes/payslip-peeks-and-probes.git` as the test repository.
 
 ## Repo Readiness Onboarding
@@ -99,11 +99,11 @@ Linear import/sync exists as a bounded optional external path, not the onboardin
 
 ## Runtime Setup Status
 
-The production app is deployed and serves the Cortex public landing page. The Vercel production environment currently has `WEB_BASE_URL`, but full signed-in manual testing remains blocked until the required Auth0, Supabase `DATABASE_URL`, and GitHub App runtime variables are configured.
+The production app is deployed and serves the Cortex public landing page. The Vercel production environment has the required Auth0 variables configured, and route smoke now confirms sign-up redirects to Auth0 with a dashboard return target. Full signed-in manual testing remains blocked until the required Supabase `DATABASE_URL` and GitHub App runtime variables are configured.
 
 The hosted Supabase Cortex project is reachable, and `pnpm supabase-smoke:check --url <supabase-project-url>` verifies REST/Auth endpoint reachability without printing response bodies, API keys, database credentials, or the project ref. The same command can omit `--url` only when `SUPABASE_URL` is exported in the shell. The latest live explicit-URL smoke returned ready with REST/Auth HTTP 401 key-auth gating in safe text output. The repository is also initialized and locally linked for Supabase CLI workflows through `supabase/config.toml`, with generated `.temp` state ignored and `supabase/README.md` documenting the operator boundary.
 
-Production credential setup is documented in `docs/PRODUCTION_RUNTIME_SETUP.md`. `pnpm release-readiness:check` now runs the combined safe release gate across runtime env, deployed route smoke, Supabase link state, Supabase migration history, direct Supabase database connectivity, and Supabase endpoint smoke without printing secret values, Supabase refs, database URLs, API keys, private keys, response bodies, local paths, query output, or raw `psql` errors. The lower-level commands remain available: `pnpm vercel-production-env:check` safely compares Vercel production environment variable names against the required runtime set without printing values, `pnpm production-runtime:check` uses `apps/web/src/runtime/env.ts` to provide a sanitized readiness check for the required Auth0, Supabase database, and GitHub App environment variables, `pnpm production-smoke:check` safely verifies deployed public/protected route reachability without printing response bodies, `pnpm supabase-link:check` safely verifies local Supabase link status without printing project refs or paths, `pnpm supabase-migrations:check` safely compares canonical local package migration IDs with linked remote migration history without applying migrations, `pnpm supabase-db:check` safely verifies direct Postgres connectivity using `DATABASE_URL` from the environment without printing database URLs or passwords, and `pnpm supabase-smoke:check --url <supabase-project-url>` safely verifies Supabase endpoint reachability without implying table grants or direct database access.
+Production credential setup is documented in `docs/PRODUCTION_RUNTIME_SETUP.md`. `pnpm release-readiness:check` now runs the combined safe release gate across local runtime env, Vercel production environment variable names, deployed route smoke, Supabase link state, Supabase migration history, direct Supabase database connectivity, and Supabase endpoint smoke without printing secret values, Supabase refs, database URLs, API keys, private keys, response bodies, local paths, query output, or raw `psql` errors. The lower-level commands remain available: `pnpm vercel-production-env:check` safely compares Vercel production environment variable names against the required runtime set without printing values, `pnpm production-runtime:check` uses `apps/web/src/runtime/env.ts` to provide a sanitized readiness check for the required Auth0, Supabase database, and GitHub App environment variables in the current shell, `pnpm production-smoke:check` safely verifies deployed public/protected route reachability and the sign-up Auth0 redirect without printing response bodies, `pnpm supabase-link:check` safely verifies local Supabase link status without printing project refs or paths, `pnpm supabase-migrations:check` safely compares canonical local package migration IDs with linked remote migration history without applying migrations, `pnpm supabase-db:check` safely verifies direct Postgres connectivity using `DATABASE_URL` from the environment without printing database URLs or passwords, and `pnpm supabase-smoke:check --url <supabase-project-url>` safely verifies Supabase endpoint reachability without implying table grants or direct database access.
 
 Canonical SQL migrations remain owned by `packages/db/migrations` and Drizzle metadata remains under `packages/db/migrations/meta`. Do not transfer migration ownership into `supabase/migrations` unless the project explicitly changes migration strategy.
 
@@ -113,7 +113,7 @@ Local Supabase link is complete and linked remote migration history is readable.
 
 - `RFB-077` and `RFB-081` are complete after token-storage documentation/checks were ported safely into the current tree with a reviewed security-model pointer.
 - Billing is a read-only internal MVP placeholder; full Stripe checkout, customer portal, and paid upgrade flows are deferred.
-- Production runtime credentials for Auth0, Supabase database access, and the GitHub App must be configured before authenticated manual testing.
+- Production runtime credentials for Supabase database access and the GitHub App must be configured before authenticated manual testing can complete.
 - The `rory-hayes/payslip-peeks-and-probes.git` test repository should be used for the post-backlog manual/Playwright validation pass before marketing work begins.
 
 ## Release Review Checklist

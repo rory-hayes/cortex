@@ -66,9 +66,10 @@ Canonical SQL migrations remain in `packages/db/migrations`, with Drizzle metada
 After setting production credentials outside the repository, verify readiness without
 printing secret values:
 
-- Run `pnpm release-readiness:check` for the combined safe release gate. It runs the
-  production runtime, deployed route smoke, Supabase link, Supabase migration history,
-  and Supabase endpoint checks through one status report without printing secret values,
+- Run `pnpm release-readiness:check` for the combined safe release gate. It runs local
+  runtime environment checks, Vercel production environment variable names, deployed route
+  smoke, Supabase link, Supabase migration history, direct database connectivity, and
+  Supabase endpoint checks through one status report without printing secret values,
   Supabase refs, database URLs, API keys, private keys, response bodies, or local paths. Use
   `pnpm release-readiness:check --json` when automation needs structured output.
 - Run `pnpm vercel-production-env:check` to compare Vercel production environment variable
@@ -78,9 +79,11 @@ printing secret values:
 - Run `pnpm production-runtime:check` in an environment that has the production values
   loaded. The command prints only variable names, statuses, and safe messages. Use
   `pnpm production-runtime:check --json` when automation needs structured output.
-- Run `pnpm production-smoke:check --url <deployed-app-url>` to verify the public route
-  and protected dashboard route without printing response bodies. Until Auth0 is configured,
-  this command is expected to report auth routes as blocked or warning-only.
+- Run `pnpm production-smoke:check --url <deployed-app-url>` to verify the public route,
+  sign-up redirect, and protected dashboard route without printing response bodies. In the
+  current production deployment, Auth0 routes should redirect to Auth0 with a dashboard
+  return target; if Auth0 runtime variables are absent, auth routes may report blocked or
+  warning-only.
 - Run `pnpm supabase-link:check` to verify this worktree has local Supabase config and
   a local link marker without printing project refs, local paths, passwords, or API keys.
   If it is blocked, run `supabase link --project-ref <project-ref>` and leave the password

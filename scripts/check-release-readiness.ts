@@ -6,6 +6,7 @@ import { runSupabaseDatabaseReadiness } from "./check-supabase-db.js";
 import { runSupabaseLinkReadiness } from "./check-supabase-link.js";
 import { runSupabaseMigrationReadiness } from "./check-supabase-migrations.js";
 import { runSupabaseSmoke } from "./check-supabase-smoke.js";
+import { runVercelProductionEnvReadiness } from "./check-vercel-production-env.js";
 
 type FetchFunction = typeof fetch;
 type ExecPsql = (
@@ -16,6 +17,7 @@ type ExecPsql = (
   readonly stdout: string;
 }>;
 type ExecSupabaseMigrations = () => Promise<string>;
+type ExecVercelEnvList = () => Promise<string>;
 
 type ReleaseCheckStatus = "blocked" | "passed" | "warning";
 
@@ -34,7 +36,8 @@ type ReleaseSection = {
     | "supabase_database"
     | "supabase_link"
     | "supabase_migrations"
-    | "supabase_smoke";
+    | "supabase_smoke"
+    | "vercel_production_env";
   readonly ready: boolean;
 };
 
@@ -48,6 +51,7 @@ type ReleaseReadinessOptions = {
   readonly env?: Readonly<Record<string, string | undefined>>;
   readonly execPsql?: ExecPsql | undefined;
   readonly execSupabaseMigrations?: ExecSupabaseMigrations | undefined;
+  readonly execVercelEnvList?: ExecVercelEnvList | undefined;
   readonly fetch?: FetchFunction | undefined;
   readonly root?: string | undefined;
   readonly supabaseUrl?: string | undefined;
@@ -74,7 +78,7 @@ type ParsedArgs =
 
 const usage = `Usage: pnpm release-readiness:check [--app-url <https-url>] [--supabase-url <https-url>] [--json]
 
-Runs the safe production release gate: runtime env, deployed route smoke, Supabase link, Supabase migration history, direct Supabase database connectivity, and Supabase endpoint smoke.
+Runs the safe production release gate: local runtime env, Vercel production env names, deployed route smoke, Supabase link, Supabase migration history, direct Supabase database connectivity, and Supabase endpoint smoke.
 Output contains only statuses, variable names, safe labels, and HTTP status codes; it never prints secret values, Supabase refs, database URLs, API keys, private keys, response bodies, or local paths.`;
 
 const toRuntimeReleaseStatus = (input: {
@@ -114,6 +118,26 @@ const makeRuntimeSection = (env: Readonly<Record<string, string | undefined>>): 
       status: toRuntimeReleaseStatus(check),
     })),
     name: "production_runtime",
+    ready: readiness.ready,
+  };
+};
+
+const makeVercelProductionEnvSection = async (
+  options: ReleaseReadinessOptions,
+): Promise<ReleaseSection> => {
+  const readiness = await runVercelProductionEnvReadiness({
+    ...(options.execVercelEnvList === undefined
+      ? {}
+      : { execVercelEnvList: options.execVercelEnvList }),
+  });
+
+  return {
+    checks: readiness.checks.map((check) => ({
+      message: check.message,
+      name: check.key,
+      status: toRuntimeReleaseStatus(check),
+    })),
+    name: "vercel_production_env",
     ready: readiness.ready,
   };
 };
@@ -287,6 +311,7 @@ export const runReleaseReadiness = async (
   const env = options.env ?? process.env;
   const sections = [
     makeRuntimeSection(env),
+    await makeVercelProductionEnvSection(options),
     await makeProductionSmokeSection({ ...options, env }),
     await makeSupabaseLinkSection(options),
     await makeSupabaseMigrationSection(options),
@@ -349,6 +374,9 @@ export const runReleaseReadinessCheck = async (
     ...(options.execSupabaseMigrations === undefined
       ? {}
       : { execSupabaseMigrations: options.execSupabaseMigrations }),
+    ...(options.execVercelEnvList === undefined
+      ? {}
+      : { execVercelEnvList: options.execVercelEnvList }),
     fetch: options.fetch,
     root: options.root,
     supabaseUrl: parsedArgs.supabaseUrl ?? options.supabaseUrl,
