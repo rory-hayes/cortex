@@ -25,6 +25,7 @@ import {
   createSyncCortexTaskToGitHubIssueAction,
   createSyncCortexTaskToLinearAction,
   createTransitionCortexTaskStatusAction,
+  createTriggerPublicRepoScanAction,
   createTriggerRepoScanAction,
   createUpdateCortexTaskExecutionModeAction,
   createUpdateFindingStatusAction,
@@ -58,6 +59,7 @@ const selectWorkspace = createSelectWorkspaceAction();
 const syncCortexTaskToGitHubIssue = createSyncCortexTaskToGitHubIssueAction();
 const syncCortexTaskToLinear = createSyncCortexTaskToLinearAction();
 const transitionCortexTaskStatus = createTransitionCortexTaskStatusAction();
+const triggerPublicRepoScan = createTriggerPublicRepoScanAction();
 const triggerRepoScan = createTriggerRepoScanAction();
 const updateCortexTaskExecutionMode = createUpdateCortexTaskExecutionModeAction();
 const updateFindingStatus = createUpdateFindingStatusAction();
@@ -164,6 +166,10 @@ export async function updateCortexTaskExecutionModeAction(input: unknown) {
 
 export async function triggerRepoScanAction(input: unknown) {
   return triggerRepoScan(input);
+}
+
+export async function triggerPublicRepoScanAction(input: unknown) {
+  return triggerPublicRepoScan(input);
 }
 
 export async function updateFindingStatusAction(input: unknown) {

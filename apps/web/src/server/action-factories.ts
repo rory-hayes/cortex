@@ -24,6 +24,12 @@ import {
   type SyncedGitHubIssueCortexTask,
 } from "../github/issues";
 import {
+  createDrizzlePublicGitHubRepositoryStore,
+  createPublicGitHubRepositoryService,
+  type RegisteredPublicGitHubRepository,
+  type RegisterPublicGitHubRepositoryInput,
+} from "../github/public-repositories";
+import {
   createCortexTaskRunnerQueueService,
   createDrizzleCortexTaskRunnerQueueStore,
 } from "../jobs/cortex-queue";
@@ -306,6 +312,12 @@ export type TriggerRepoScanActionData = {
   workspaceId: string;
 };
 type TriggerRepoScanAction = (input: unknown) => Promise<ActionResult<TriggerRepoScanActionData>>;
+export type TriggerPublicRepoScanInput = RegisterPublicGitHubRepositoryInput & {
+  productGoal?: string;
+};
+type TriggerPublicRepoScanAction = (
+  input: unknown,
+) => Promise<ActionResult<TriggerRepoScanActionData>>;
 export type GetRepoScanStatusActionData = RepoScanStatusSummary;
 type GetRepoScanStatusAction = (
   input: unknown,
@@ -602,6 +614,7 @@ const syncCortexTaskToLinearCanonicalActionFields = new Set([
   "statusId",
 ]);
 const syncCortexTaskToGitHubIssueCanonicalActionFields = new Set(["workspaceId", "taskId"]);
+const triggerPublicRepoScanActionFields = new Set(["workspaceId", "repositoryUrl", "productGoal"]);
 
 const assertNoUnsafeManualTaskFormFields = (input: unknown): void => {
   const fields =
@@ -948,6 +961,24 @@ const parseTriggerRepoScanInput = (input: unknown): TriggerRepoScanInput => {
   return {
     ...(productGoal === undefined ? {} : { productGoal }),
     repoId: parseBoundedStringField(input, "repoId", 240),
+    workspaceId: parseBoundedStringField(input, "workspaceId", 240),
+  };
+};
+
+const parseTriggerPublicRepoScanInput = (input: unknown): TriggerPublicRepoScanInput => {
+  assertOnlyAllowedCanonicalActionFields(input, triggerPublicRepoScanActionFields);
+  const productGoal = parseOptionalProductGoal(input);
+  const repositoryUrl = parseBoundedStringField(input, "repositoryUrl", 512);
+
+  try {
+    assertSafeWebBoundPayload(repositoryUrl);
+  } catch {
+    throw createActionError("validation_error");
+  }
+
+  return {
+    ...(productGoal === undefined ? {} : { productGoal }),
+    repositoryUrl,
     workspaceId: parseBoundedStringField(input, "workspaceId", 240),
   };
 };
@@ -1536,6 +1567,17 @@ const triggerRepoScanWithDatabase = async (
   return service.triggerRepoScan(input);
 };
 
+const registerPublicGitHubRepositoryWithDatabase = async (
+  input: RegisterPublicGitHubRepositoryInput,
+): Promise<RegisteredPublicGitHubRepository> => {
+  const { db } = getDatabase();
+  const service = createPublicGitHubRepositoryService({
+    store: createDrizzlePublicGitHubRepositoryStore(db),
+  });
+
+  return service.registerPublicGitHubRepository(input);
+};
+
 const getRepoScanStatusWithDatabase = async (
   input: GetRepoScanStatusInput,
 ): Promise<RepoScanStatusSummary | null> => {
@@ -2039,6 +2081,39 @@ export const createTriggerRepoScanAction = (
     runServerAction(async () => {
       const parsedInput = parseTriggerRepoScanInput(input);
       const data = await triggerRepoScan(parsedInput);
+
+      revalidateRepoScanSurfaces(revalidatePath);
+
+      return toTriggerRepoScanActionData(data);
+    });
+};
+
+export const createTriggerPublicRepoScanAction = (
+  deps: {
+    registerPublicGitHubRepository?: (
+      input: RegisterPublicGitHubRepositoryInput,
+    ) => Promise<RegisteredPublicGitHubRepository>;
+    revalidatePath?: (path: string) => void;
+    triggerRepoScan?: (input: TriggerRepoScanInput) => Promise<TriggeredRepoScan>;
+  } = {},
+): TriggerPublicRepoScanAction => {
+  const registerPublicGitHubRepository =
+    deps.registerPublicGitHubRepository ?? registerPublicGitHubRepositoryWithDatabase;
+  const revalidatePath = deps.revalidatePath ?? defaultRevalidatePath;
+  const triggerRepoScan = deps.triggerRepoScan ?? triggerRepoScanWithDatabase;
+
+  return async (input: unknown) =>
+    runServerAction(async () => {
+      const parsedInput = parseTriggerPublicRepoScanInput(input);
+      const repository = await registerPublicGitHubRepository({
+        repositoryUrl: parsedInput.repositoryUrl,
+        workspaceId: parsedInput.workspaceId,
+      });
+      const data = await triggerRepoScan({
+        ...(parsedInput.productGoal === undefined ? {} : { productGoal: parsedInput.productGoal }),
+        repoId: repository.repoId,
+        workspaceId: parsedInput.workspaceId,
+      });
 
       revalidateRepoScanSurfaces(revalidatePath);
 

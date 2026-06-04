@@ -20,6 +20,7 @@ type StoredRepository = {
   githubAppInstallationId: string;
   githubInstallationId: string;
   id: string;
+  isPrivate: boolean;
   repositoryName: string;
   repositoryOwner: string;
   workspaceId: string;
@@ -40,6 +41,7 @@ const createRepository = (overrides: Partial<StoredRepository> = {}): StoredRepo
   githubAppInstallationId: "github_app_installation_1",
   githubInstallationId: "12345",
   id: "github_repository_1",
+  isPrivate: false,
   repositoryName: "control-plane",
   repositoryOwner: "acme",
   workspaceId: "workspace_1",
@@ -138,6 +140,7 @@ const createService = async (input: {
   request?: GitHubAppRequestFunction;
   store: ReturnType<typeof createStore>;
   userId?: string | null;
+  publicRequest?: GitHubAppRequestFunction;
 }) => {
   const { createGitHubRepositoryInventoryService } = await importGitHubInventory();
 
@@ -146,6 +149,7 @@ const createService = async (input: {
       userId: input.userId === undefined ? "user_1" : input.userId,
     }),
     ...(input.buildInventory === undefined ? {} : { buildInventory: input.buildInventory }),
+    ...(input.publicRequest === undefined ? {} : { publicRequest: input.publicRequest }),
     request: input.request ?? createRequest().request,
     store: input.store,
   });
@@ -406,6 +410,92 @@ describe("GitHub repository inventory facade", () => {
       installationId: 12345,
       operation: "getRepositoryTree",
       path: "/repos/acme/control-plane/git/trees/main",
+    });
+    expectNoUnsafeWebMaterial(result);
+  });
+
+  test("uses public GitHub requests for public repository sources without App credentials", async () => {
+    const { request: appRequest } = createRequest();
+    const publicRequests: GitHubAppRequest[] = [];
+    const publicRequest = vi.fn<GitHubAppRequestFunction>(async (transportRequest) => {
+      publicRequests.push(transportRequest);
+
+      if (transportRequest.path.includes("/git/trees/")) {
+        return {
+          truncated: false,
+          tree: [
+            { path: "README.md", mode: "100644", type: "blob", size: 320, sha: "readme-sha" },
+            { path: "package.json", mode: "100644", type: "blob", size: 20, sha: "package-sha" },
+          ],
+        };
+      }
+
+      if (transportRequest.path.includes("/contents/README.md")) {
+        return {
+          content: Buffer.from("Readiness docs describe product workflow and validation.").toString(
+            "base64",
+          ),
+          encoding: "base64",
+          size: 320,
+          type: "file",
+        };
+      }
+
+      if (transportRequest.path.includes("/contents/package.json")) {
+        return {
+          content: Buffer.from("{}").toString("base64"),
+          encoding: "base64",
+          size: 20,
+          type: "file",
+        };
+      }
+
+      throw new Error("Unexpected public request with ghp_publicPayloadShouldNotLeak");
+    });
+    const store = createStore({
+      installations: [
+        createInstallation({
+          githubInstallationId: "public:1214393190",
+          id: "github_app_installation_public:workspace_1:1214393190",
+        }),
+      ],
+      memberships: [{ userId: "user_1", workspaceId: "workspace_1" }],
+      repositories: [
+        createRepository({
+          githubAppInstallationId: "github_app_installation_public:workspace_1:1214393190",
+          githubInstallationId: "public:1214393190",
+          repositoryName: "payslip-peeks-and-probes",
+          repositoryOwner: "rory-hayes",
+        }),
+      ],
+    });
+    const service = await createService({
+      publicRequest,
+      request: appRequest,
+      store,
+    });
+
+    const result = await service.buildRepositoryInventory({
+      repoId: "github_repository_1",
+      workspaceId: "workspace_1",
+    });
+
+    expect(appRequest).not.toHaveBeenCalled();
+    expect(publicRequests[0]).toMatchObject({
+      installationId: 1,
+      operation: "getRepositoryTree",
+      path: "/repos/rory-hayes/payslip-peeks-and-probes/git/trees/main",
+    });
+    expect(result).toMatchObject({
+      repoId: "github_repository_1",
+      repository: {
+        name: "payslip-peeks-and-probes",
+        owner: "rory-hayes",
+      },
+      serviceMetadata: {
+        githubInstallationId: "public:1214393190",
+      },
+      workspaceId: "workspace_1",
     });
     expectNoUnsafeWebMaterial(result);
   });

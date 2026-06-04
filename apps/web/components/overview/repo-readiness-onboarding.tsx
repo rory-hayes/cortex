@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { AlertTriangle, GitBranch, ScanSearch, ShieldCheck } from "lucide-react";
+import { AlertTriangle, GitBranch, Globe2, ScanSearch, ShieldCheck } from "lucide-react";
 
 import type { WorkspaceDashboardOverview } from "@/src/dashboard/overview";
 import { safeDisplayText } from "@/components/display-safety";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { triggerRepoScanAction } from "@/src/server/actions";
+import { triggerPublicRepoScanAction, triggerRepoScanAction } from "@/src/server/actions";
 
 type RepoReadinessOnboardingProps = {
   onboarding: WorkspaceDashboardOverview["repoReadinessOnboarding"];
@@ -17,6 +18,12 @@ async function submitRepoReadinessScanAction(formData: FormData): Promise<void> 
   "use server";
 
   await triggerRepoScanAction(formData);
+}
+
+async function submitPublicRepoReadinessScanAction(formData: FormData): Promise<void> {
+  "use server";
+
+  await triggerPublicRepoScanAction(formData);
 }
 
 const formatVisibility = (
@@ -113,31 +120,68 @@ export function RepoReadinessOnboarding({
         </div>
 
         {repositoryOptions.length === 0 ? (
-          <div className="mt-6 flex flex-col gap-4 border-t border-border pt-5 md:flex-row md:items-center md:justify-between">
-            <div className="max-w-2xl">
-              <h3 className="text-sm font-semibold">
-                {onboarding.connectionStatus === "not_connected"
-                  ? "No GitHub connection"
-                  : onboarding.connectionStatus === "suspended"
-                    ? "GitHub installation suspended"
-                    : "No repository access"}
-              </h3>
-              <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-                {onboarding.connectionStatus === "not_connected"
-                  ? "Connect GitHub to sync selectable repositories for the first readiness scan."
-                  : onboarding.connectionStatus === "suspended"
-                    ? "Reactivate the GitHub App installation before selecting repositories for scan."
-                    : "GitHub is connected, but no active repositories are available for this workspace. Adjust repository selection or sync repo access before scanning."}
-              </p>
+          <div className="mt-6 grid gap-5 border-t border-border pt-5">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="max-w-2xl">
+                <h3 className="text-sm font-semibold">
+                  {onboarding.connectionStatus === "not_connected"
+                    ? "No GitHub connection"
+                    : onboarding.connectionStatus === "suspended"
+                      ? "GitHub installation suspended"
+                      : "No repository access"}
+                </h3>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+                  {onboarding.connectionStatus === "not_connected"
+                    ? "Connect GitHub to sync selectable repositories for the first readiness scan."
+                    : onboarding.connectionStatus === "suspended"
+                      ? "Reactivate the GitHub App installation before selecting repositories for scan."
+                      : "GitHub is connected, but no active repositories are available for this workspace. Adjust repository selection or sync repo access before scanning."}
+                </p>
+              </div>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/settings/github">
+                  <GitBranch aria-hidden="true" className="size-4" />
+                  {onboarding.connectionStatus === "not_connected"
+                    ? "Connect GitHub repo"
+                    : "Adjust GitHub repo access"}
+                </Link>
+              </Button>
             </div>
-            <Button asChild>
-              <Link href="/dashboard/settings/github">
-                <GitBranch aria-hidden="true" className="size-4" />
-                {onboarding.connectionStatus === "not_connected"
-                  ? "Connect GitHub repo"
-                  : "Adjust GitHub repo access"}
-              </Link>
-            </Button>
+            <form action={submitPublicRepoReadinessScanAction} className="grid gap-4">
+              <input name="workspaceId" type="hidden" value={onboarding.workspaceId} />
+              <fieldset className="grid gap-3 rounded-md border border-border p-4">
+                <legend className="text-sm font-medium">Scan public GitHub repo</legend>
+                <label className="grid gap-2" htmlFor="repo-readiness-public-url">
+                  <span className="text-sm font-medium">Public repository URL</span>
+                  <Input
+                    id="repo-readiness-public-url"
+                    maxLength={512}
+                    name="repositoryUrl"
+                    placeholder="https://github.com/rory-hayes/payslip-peeks-and-probes.git"
+                    type="url"
+                  />
+                </label>
+                <label className="grid gap-2" htmlFor="repo-readiness-public-product-goal">
+                  <span className="text-sm font-medium">Product goal</span>
+                  <Textarea
+                    id="repo-readiness-public-product-goal"
+                    maxLength={500}
+                    name="productGoal"
+                    placeholder="Review this repository for AI-ready setup tasks."
+                    rows={3}
+                  />
+                </label>
+              </fieldset>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+                  Public scans use bounded GitHub metadata reads and keep execution local.
+                </p>
+                <Button className="w-fit" type="submit">
+                  <Globe2 aria-hidden="true" className="size-4" />
+                  Scan public repo
+                </Button>
+              </div>
+            </form>
           </div>
         ) : (
           <form

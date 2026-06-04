@@ -182,6 +182,7 @@ export type DashboardOverviewRepoReadinessOnboarding = {
   hasRepoAccess: boolean;
   installationCount: number;
   repositoryOptions: DashboardOverviewRepositoryOption[];
+  workspaceId: string;
 };
 
 export type DashboardOverviewActionItemId =
@@ -827,6 +828,7 @@ const createRepoReadinessOnboarding = (input: {
     hasRepoAccess: repositoryOptions.length > 0,
     installationCount,
     repositoryOptions,
+    workspaceId: input.workspaceId,
   };
 };
 

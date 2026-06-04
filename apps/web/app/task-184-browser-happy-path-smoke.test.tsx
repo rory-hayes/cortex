@@ -76,6 +76,7 @@ const onboarding = {
       workspaceId: "workspace_1",
     },
   ],
+  workspaceId: "workspace_1",
 } satisfies WorkspaceDashboardOverview["repoReadinessOnboarding"];
 
 const createFinding = (

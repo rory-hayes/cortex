@@ -203,6 +203,7 @@ const createOverview = (
           workspaceId: "workspace_1",
         },
       ],
+      workspaceId: "workspace_1",
     },
     runnerHealth: {
       busy: 1,
@@ -563,6 +564,7 @@ describe("overview dashboard UI", () => {
         hasRepoAccess: false,
         installationCount: 0,
         repositoryOptions: [],
+        workspaceId: "workspace_1",
       },
     });
 
@@ -594,6 +596,7 @@ describe("overview dashboard UI", () => {
         hasRepoAccess: false,
         installationCount: 1,
         repositoryOptions: [],
+        workspaceId: "workspace_1",
       },
     });
 
@@ -653,6 +656,7 @@ describe("overview dashboard UI", () => {
             workspaceId: "workspace_1",
           },
         ],
+        workspaceId: "workspace_1",
       },
     });
 
@@ -699,6 +703,20 @@ describe("overview dashboard UI", () => {
     expect(source).toContain("reduced scan quality");
     expect(source).not.toMatch(
       /name="(?:owner|repositoryOwner|repositoryName|repositoryFullName|defaultBranch|visibility|localPath|source|diff|patch|stdout|stderr|rawOutput|secret|token)"/i,
+    );
+    expectNoUnsafeOverviewDisplayMaterial(source);
+  });
+
+  test("repo-readiness onboarding offers public GitHub URL scanning without app installation fields", async () => {
+    const source = await readAppFile("../components/overview/repo-readiness-onboarding.tsx");
+
+    expect(source).toContain("triggerPublicRepoScanAction");
+    expect(source).toContain("await triggerPublicRepoScanAction(formData)");
+    expect(source).toContain('name="repositoryUrl"');
+    expect(source).toContain("Scan public GitHub repo");
+    expect(source).toContain("payslip-peeks-and-probes");
+    expect(source).not.toMatch(
+      /name="(?:clientSecret|privateKey|installationId|token|rawOutput|source|diff|patch|stdout|stderr)"/i,
     );
     expectNoUnsafeOverviewDisplayMaterial(source);
   });

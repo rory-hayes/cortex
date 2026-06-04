@@ -274,6 +274,86 @@ describe("action factory focused exports", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/dashboard");
   });
 
+  test("createTriggerPublicRepoScanAction registers a public GitHub URL and queues a scan", async () => {
+    const { createTriggerPublicRepoScanAction } = await importActionFactories();
+    const revalidatePath = vi.fn();
+    const registerPublicGitHubRepository = vi.fn(async () => ({
+      githubInstallationId: "public:1214393190",
+      repoId: "github_repository_public_1",
+      repositoryFullName: "rory-hayes/payslip-peeks-and-probes",
+      workspaceId: "workspace_1",
+    }));
+    const triggerRepoScan = vi.fn(async () => ({
+      created: true,
+      repoId: "github_repository_public_1",
+      scanId: "repo_scan_public_1",
+      status: "queued" as const,
+      workspaceId: "workspace_1",
+    }));
+    const action = createTriggerPublicRepoScanAction({
+      registerPublicGitHubRepository,
+      revalidatePath,
+      triggerRepoScan,
+    });
+
+    await expect(
+      action({
+        productGoal: " Review this payroll repo for AI-ready setup tasks. ",
+        repositoryUrl: " https://github.com/rory-hayes/payslip-peeks-and-probes.git ",
+        workspaceId: " workspace_1 ",
+      }),
+    ).resolves.toEqual({
+      data: {
+        repoId: "github_repository_public_1",
+        scanId: "repo_scan_public_1",
+        status: "queued",
+        workspaceId: "workspace_1",
+      },
+      ok: true,
+    });
+    expect(registerPublicGitHubRepository).toHaveBeenCalledWith({
+      repositoryUrl: "https://github.com/rory-hayes/payslip-peeks-and-probes.git",
+      workspaceId: "workspace_1",
+    });
+    expect(triggerRepoScan).toHaveBeenCalledWith({
+      productGoal: "Review this payroll repo for AI-ready setup tasks.",
+      repoId: "github_repository_public_1",
+      workspaceId: "workspace_1",
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/repositories");
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard/audit-log");
+    expect(revalidatePath).toHaveBeenCalledWith("/dashboard");
+  });
+
+  test("createTriggerPublicRepoScanAction rejects unsafe hidden fields before public registration", async () => {
+    const { createTriggerPublicRepoScanAction } = await importActionFactories();
+    const revalidatePath = vi.fn();
+    const registerPublicGitHubRepository = vi.fn();
+    const triggerRepoScan = vi.fn();
+    const action = createTriggerPublicRepoScanAction({
+      registerPublicGitHubRepository,
+      revalidatePath,
+      triggerRepoScan,
+    });
+
+    await expect(
+      action({
+        rawOutput: "diff --git a/app.ts b/app.ts",
+        repositoryUrl: "https://github.com/rory-hayes/payslip-peeks-and-probes",
+        workspaceId: "workspace_1",
+      }),
+    ).resolves.toEqual({
+      error: {
+        code: "validation_error",
+        message: "Check the submitted fields and try again.",
+      },
+      ok: false,
+    });
+    expect(registerPublicGitHubRepository).not.toHaveBeenCalled();
+    expect(triggerRepoScan).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
   test.each([
     { field: "repo-id", value: "diff --git a/app.ts b/app.ts" },
     { field: "workspace_id", value: "ghp_scantriggersecret1234567890" },

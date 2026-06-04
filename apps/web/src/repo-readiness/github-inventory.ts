@@ -23,6 +23,8 @@ import {
   type GetAuthContext,
   type WorkspaceMembershipStore,
 } from "../server/auth";
+import { createPublicGitHubRequestFunction } from "../github/public-request";
+import { isPublicGitHubInstallationId } from "../github/public-repositories";
 import { createActionError } from "../server/errors";
 import { assertSafeWebBoundPayload } from "../security/payload-guard";
 
@@ -34,6 +36,7 @@ type GitHubInventoryRepositoryRow = Pick<
   | "githubAppInstallationId"
   | "githubInstallationId"
   | "id"
+  | "isPrivate"
   | "repositoryName"
   | "repositoryOwner"
   | "workspaceId"
@@ -237,6 +240,7 @@ export const createDrizzleGitHubRepositoryInventoryStore = (
         githubAppInstallationId: schema.githubRepositories.githubAppInstallationId,
         githubInstallationId: schema.githubRepositories.githubInstallationId,
         id: schema.githubRepositories.id,
+        isPrivate: schema.githubRepositories.isPrivate,
         repositoryName: schema.githubRepositories.repositoryName,
         repositoryOwner: schema.githubRepositories.repositoryOwner,
         workspaceId: schema.githubRepositories.workspaceId,
@@ -271,11 +275,13 @@ export const createDrizzleGitHubRepositoryInventoryStore = (
 export const createGitHubRepositoryInventoryService = (input: {
   buildInventory?: GitHubRepositoryInventoryBuilder;
   getAuthContext?: GetAuthContext;
+  publicRequest?: GitHubAppRequestFunction;
   request: GitHubAppRequestFunction;
   store: GitHubRepositoryInventoryStore;
 }): GitHubRepositoryInventoryService => {
   const getAuthContext = input.getAuthContext ?? getCurrentAuthContext;
   const buildInventory = input.buildInventory ?? buildGitHubRepositoryInventory;
+  const publicRequest = input.publicRequest ?? createPublicGitHubRequestFunction();
 
   return {
     buildRepositoryInventory: async (buildInput) => {
@@ -311,12 +317,20 @@ export const createGitHubRepositoryInventoryService = (input: {
       assertScanOnlyPermissions(installation.permissions);
 
       try {
+        const isPublicSource = isPublicGitHubInstallationId(installation.githubInstallationId);
+
+        if (isPublicSource && repository.isPrivate) {
+          throw createActionError("validation_error");
+        }
+
         const inventory = await buildInventory({
           defaultBranch: repository.defaultBranch,
-          installationId: parseInstallationId(installation.githubInstallationId),
+          installationId: isPublicSource
+            ? 1
+            : parseInstallationId(installation.githubInstallationId),
           owner: repository.repositoryOwner,
           repo: repository.repositoryName,
-          request: input.request,
+          request: isPublicSource ? publicRequest : input.request,
         });
 
         return buildServiceResult({

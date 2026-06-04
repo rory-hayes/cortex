@@ -499,6 +499,7 @@ describe("dashboard overview service", () => {
       hasRepoAccess: false,
       installationCount: 0,
       repositoryOptions: [],
+      workspaceId: "workspace_1",
     });
     expect(store.listWorkspaceOverviewGitHubInstallations).toHaveBeenCalledWith({
       workspaceId: "workspace_1",
@@ -571,6 +572,7 @@ describe("dashboard overview service", () => {
           workspaceId: "workspace_1",
         },
       ],
+      workspaceId: "workspace_1",
     });
     expectNoUnsafeOverviewMaterial(result);
   });
@@ -595,6 +597,7 @@ describe("dashboard overview service", () => {
       hasRepoAccess: false,
       installationCount: 1,
       repositoryOptions: [],
+      workspaceId: "workspace_1",
     });
     expectNoUnsafeOverviewMaterial(result);
   });
