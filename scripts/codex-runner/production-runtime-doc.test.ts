@@ -47,11 +47,13 @@ describe("production runtime setup documentation", () => {
     expect(docs).toContain("database verification and applying canonical package migrations");
     expect(docs).toContain("Canonical SQL migrations remain in `packages/db/migrations`");
     expect(docs).toContain("pnpm release-readiness:check");
+    expect(normalizedDocs).toContain("GitHub App runtime identity");
     expect(docs).toContain("Vercel production environment variable names");
     expect(docs).toContain("pnpm vercel-production-env:check");
     expect(docs).toContain("pnpm vercel-production-env:apply --dry-run");
     expect(docs).toContain("sends values to the Vercel CLI through stdin");
     expect(docs).toContain("pnpm production-runtime:check");
+    expect(docs).toContain("pnpm github-app:check");
     expect(docs).toContain("pnpm production-smoke:check");
     expect(docs).toContain("pnpm supabase-link:check");
     expect(docs).toContain("pnpm supabase-migrations:check");

@@ -34,6 +34,9 @@ secrets, response bodies, local paths, and raw provider output.
   can be verified on machines without `psql`.
 - Added `pnpm vercel-production-env:apply --key <required-key>` so operators can apply one
   recovered required production value without loading unrelated missing credentials.
+- Added `pnpm github-app:check` and wired GitHub App runtime identity verification into the
+  combined release-readiness gate without printing private keys, JWTs, webhook secrets, raw
+  GitHub errors, or response bodies.
 - Applied `DATABASE_URL` to Vercel production through the safe env helper, sending the value
   through stdin and printing only key names/statuses.
 - Updated production runtime documentation, release notes, README, SPRINT, and BACKLOG status.
@@ -53,8 +56,8 @@ secrets, response bodies, local paths, and raw provider output.
 - Browser smoke: the production homepage renders as `AI Engineering Control Plane`, exposes
   sign-in/sign-up links, and the sign-up path redirects to the configured Auth0 tenant's signup
   screen. The dashboard return target is validated by the HTTP smoke check.
-- Combined release-readiness gate: blocked only by required GitHub App runtime credentials,
-  with optional Linear warnings.
+- Combined release-readiness gate: includes the GitHub App runtime identity section and is
+  blocked only by required GitHub App runtime credentials, with optional Linear warnings.
 - Repository validation: `pnpm run typecheck`, `pnpm run lint`, `pnpm run format:check`, and
   `pnpm test` passed.
 - Production build: `pnpm run build` passed; local build emitted expected Auth0 warnings because
@@ -64,6 +67,8 @@ secrets, response bodies, local paths, and raw provider output.
 
 - Configure `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY`, and `GITHUB_WEBHOOK_SECRET` in Vercel
   production.
+- Run `pnpm github-app:check` with those values loaded in the shell to verify local JWT signing
+  and GitHub App identity before redeploying.
 - Redeploy production after the remaining GitHub App values are configured.
 - Rerun production GitHub-connect/setup-PR E2E once those credentials are available.
 - Complete a signed-in browser walkthrough with a real Auth0 test user: sign in, create/select

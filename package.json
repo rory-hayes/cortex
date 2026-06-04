@@ -9,6 +9,7 @@
     "codex-runner": "tsx scripts/codex-runner/index.ts",
     "codex-runner-dashboard": "tsx scripts/codex-runner/dashboard.ts",
     "format:check": "prettier --check \"package.json\" \"pnpm-workspace.yaml\" \"tsconfig*.json\" \"eslint.config.js\" \"vitest.config.ts\" \".prettierrc\" \"apps/**/*.{js,mjs,cjs,ts,tsx,json,yaml,yml}\" \"packages/**/*.{js,mjs,cjs,ts,tsx,json,yaml,yml}\" \"scripts/**/*.{js,mjs,cjs,ts,tsx,json,yaml,yml}\"",
+    "github-app:check": "tsx scripts/check-github-app-runtime.ts",
     "lint": "eslint \"**/*.{js,mjs,cjs,ts,tsx}\" --no-error-on-unmatched-pattern",
     "production-runtime:check": "tsx scripts/check-production-runtime.ts",
     "production-smoke:check": "tsx scripts/check-production-smoke.ts",

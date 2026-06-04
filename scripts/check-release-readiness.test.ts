@@ -51,6 +51,30 @@ const makeVercelEnvList = (keys: readonly string[]): string =>
   JSON.stringify(keys.map((key) => ({ key, target: ["production"] })));
 
 const validVercelEnvList = makeVercelEnvList(Object.keys(validEnv));
+const readyGitHubAppRuntime = async () => ({
+  checks: [
+    {
+      message: "GitHub App API identity verification completed successfully.",
+      name: "app_identity" as const,
+      status: "passed" as const,
+      statusCode: 200,
+    },
+  ],
+  live: true,
+  ready: true,
+});
+
+const blockedGitHubAppRuntime = async () => ({
+  checks: [
+    {
+      message: "GITHUB_APP_PRIVATE_KEY is required.",
+      name: "GITHUB_APP_PRIVATE_KEY" as const,
+      status: "blocked" as const,
+    },
+  ],
+  live: true,
+  ready: false,
+});
 
 afterEach(async () => {
   await Promise.all(tempRoots.map((root) => rm(root, { recursive: true, force: true })));
@@ -112,6 +136,7 @@ describe("release readiness check command", () => {
                | 0000   | 0000
                | 0001   | 0001
       `,
+      execGitHubAppRuntime: readyGitHubAppRuntime,
       execVercelEnvList: async () => validVercelEnvList,
       fetch: (async (url) => {
         const requestUrl = String(url);
@@ -148,6 +173,7 @@ describe("release readiness check command", () => {
     expect(output).toContain("Release readiness: ready");
     expect(output).toContain("[ready] production_runtime");
     expect(output).toContain("[ready] vercel_production_env");
+    expect(output).toContain("[ready] github_app_runtime");
     expect(output).toContain("[ready] production_smoke");
     expect(output).toContain("[ready] supabase_link");
     expect(output).toContain("[ready] supabase_migrations");
@@ -192,6 +218,7 @@ describe("release readiness check command", () => {
         -------|--------|------------
                | 0000   | 0000
       `,
+      execGitHubAppRuntime: blockedGitHubAppRuntime,
       execVercelEnvList: async () => makeVercelEnvList(["WEB_BASE_URL"]),
       root,
       stdout: (message) => {
@@ -203,6 +230,7 @@ describe("release readiness check command", () => {
     expect(output).toContain("Release readiness: blocked");
     expect(output).toContain("[blocked] production_runtime");
     expect(output).toContain("[blocked] vercel_production_env");
+    expect(output).toContain("[blocked] github_app_runtime");
     expect(output).toContain("[blocked] production_smoke");
     expect(output).toContain("[blocked] supabase_link");
     expect(output).toContain("[blocked] supabase_migrations");
@@ -229,6 +257,7 @@ describe("release readiness check command", () => {
         -------|--------|------------
                | 0000   | 0000
       `,
+      execGitHubAppRuntime: readyGitHubAppRuntime,
       execVercelEnvList: async () => validVercelEnvList,
       fetch: (async (url) => {
         const requestUrl = String(url);
@@ -271,6 +300,7 @@ describe("release readiness check command", () => {
       expect.arrayContaining([
         expect.objectContaining({ name: "production_runtime", ready: true }),
         expect.objectContaining({ name: "vercel_production_env", ready: true }),
+        expect.objectContaining({ name: "github_app_runtime", ready: true }),
         expect.objectContaining({ name: "production_smoke", ready: true }),
         expect.objectContaining({ name: "supabase_link", ready: true }),
         expect.objectContaining({ name: "supabase_migrations", ready: true }),
@@ -280,6 +310,7 @@ describe("release readiness check command", () => {
     );
     expect(output).not.toContain(validEnv.DATABASE_URL);
     expect(output).not.toContain(validEnv.GITHUB_APP_PRIVATE_KEY);
+    expect(output).not.toContain(validEnv.GITHUB_WEBHOOK_SECRET);
     expect(output).not.toContain("project-ref");
     expect(output).not.toContain("supabase.co");
   });

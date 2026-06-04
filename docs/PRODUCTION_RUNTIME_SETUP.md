@@ -67,11 +67,12 @@ After setting production credentials outside the repository, verify readiness wi
 printing secret values:
 
 - Run `pnpm release-readiness:check` for the combined safe release gate. It runs local
-  runtime environment checks, Vercel production environment variable names, deployed route
-  smoke, Supabase link, Supabase migration history, direct database connectivity, and
-  Supabase endpoint checks through one status report without printing secret values,
-  Supabase refs, database URLs, API keys, private keys, response bodies, or local paths. Use
-  `pnpm release-readiness:check --json` when automation needs structured output.
+  runtime environment checks, Vercel production environment variable names, GitHub App
+  runtime identity, deployed route smoke, Supabase link, Supabase migration history, direct
+  database connectivity, and Supabase endpoint checks through one status report without
+  printing secret values, Supabase refs, database URLs, API keys, private keys, JWTs,
+  webhook secrets, response bodies, or local paths. Use `pnpm release-readiness:check --json`
+  when automation needs structured output.
 - Run `pnpm vercel-production-env:check` to compare Vercel production environment variable
   names against the required runtime set. The command prints only variable names and
   statuses, never environment values. Use `pnpm vercel-production-env:check --json` when
@@ -89,6 +90,12 @@ printing secret values:
 - Run `pnpm production-runtime:check` in an environment that has the production values
   loaded. The command prints only variable names, statuses, and safe messages. Use
   `pnpm production-runtime:check --json` when automation needs structured output.
+- Run `pnpm github-app:check` after loading `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY`, and
+  `GITHUB_WEBHOOK_SECRET` in the shell to sign a local GitHub App JWT and verify the app
+  identity through GitHub. Use `pnpm github-app:check --offline` to check required values and
+  local JWT signing without a live GitHub API request. The command prints only key names,
+  statuses, and HTTP status codes; it never prints private keys, JWTs, webhook secrets,
+  response bodies, or raw GitHub errors.
 - Run `pnpm production-smoke:check --url <deployed-app-url>` to verify the public route,
   sign-up redirect, and protected dashboard route without printing response bodies. In the
   current production deployment, Auth0 routes should redirect to Auth0 with a dashboard

@@ -37,6 +37,7 @@ describe("MVP release notes", () => {
     expect(notes).toContain("pnpm vercel-production-env:check");
     expect(notes).toContain("pnpm vercel-production-env:apply --dry-run");
     expect(notes).toContain("pnpm production-runtime:check");
+    expect(notes).toContain("pnpm github-app:check");
     expect(notes).toContain("pnpm production-smoke:check");
     expect(notes).toContain("pnpm supabase-link:check");
     expect(notes).toContain("pnpm supabase-migrations:check");

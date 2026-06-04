@@ -1,6 +1,7 @@
 import { pathToFileURL } from "node:url";
 
 import { assessProductionRuntimeEnv } from "../apps/web/src/runtime/env.js";
+import { runGitHubAppRuntimeReadiness } from "./check-github-app-runtime.js";
 import { runProductionSmoke } from "./check-production-smoke.js";
 import { runSupabaseDatabaseReadiness } from "./check-supabase-db.js";
 import { runSupabaseLinkReadiness } from "./check-supabase-link.js";
@@ -18,6 +19,7 @@ type ExecPsql = (
 }>;
 type ExecSupabaseMigrations = () => Promise<string>;
 type ExecVercelEnvList = () => Promise<string>;
+type ExecGitHubAppRuntime = () => ReturnType<typeof runGitHubAppRuntimeReadiness>;
 
 type ReleaseCheckStatus = "blocked" | "passed" | "warning";
 
@@ -31,6 +33,7 @@ type ReleaseCheck = {
 type ReleaseSection = {
   readonly checks: ReleaseCheck[];
   readonly name:
+    | "github_app_runtime"
     | "production_runtime"
     | "production_smoke"
     | "supabase_database"
@@ -49,6 +52,7 @@ type ReleaseReadinessResult = {
 type ReleaseReadinessOptions = {
   readonly appUrl?: string | undefined;
   readonly env?: Readonly<Record<string, string | undefined>>;
+  readonly execGitHubAppRuntime?: ExecGitHubAppRuntime | undefined;
   readonly execPsql?: ExecPsql | undefined;
   readonly execSupabaseMigrations?: ExecSupabaseMigrations | undefined;
   readonly execVercelEnvList?: ExecVercelEnvList | undefined;
@@ -78,8 +82,8 @@ type ParsedArgs =
 
 const usage = `Usage: pnpm release-readiness:check [--app-url <https-url>] [--supabase-url <https-url>] [--json]
 
-Runs the safe production release gate: local runtime env, Vercel production env names, deployed route smoke, Supabase link, Supabase migration history, direct Supabase database connectivity, and Supabase endpoint smoke.
-Output contains only statuses, variable names, safe labels, and HTTP status codes; it never prints secret values, Supabase refs, database URLs, API keys, private keys, response bodies, or local paths.`;
+Runs the safe production release gate: local runtime env, Vercel production env names, GitHub App runtime identity, deployed route smoke, Supabase link, Supabase migration history, direct Supabase database connectivity, and Supabase endpoint smoke.
+Output contains only statuses, variable names, safe labels, and HTTP status codes; it never prints secret values, Supabase refs, database URLs, API keys, private keys, JWTs, webhook secrets, response bodies, or local paths.`;
 
 const toRuntimeReleaseStatus = (input: {
   readonly required: boolean;
@@ -140,6 +144,37 @@ const makeVercelProductionEnvSection = async (
     name: "vercel_production_env",
     ready: readiness.ready,
   };
+};
+
+const makeGitHubAppRuntimeSection = async (
+  options: ReleaseReadinessOptions,
+): Promise<ReleaseSection> => {
+  try {
+    const readiness =
+      options.execGitHubAppRuntime === undefined
+        ? await runGitHubAppRuntimeReadiness({
+            env: options.env ?? process.env,
+            ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
+          })
+        : await options.execGitHubAppRuntime();
+
+    return {
+      checks: readiness.checks.map((check) => ({
+        message: check.message,
+        name: check.name,
+        status: check.status,
+        ...(check.statusCode === undefined ? {} : { statusCode: check.statusCode }),
+      })),
+      name: "github_app_runtime",
+      ready: readiness.ready,
+    };
+  } catch {
+    return makeBlockedSection(
+      "github_app_runtime",
+      "app_identity",
+      "GitHub App runtime verification could not run.",
+    );
+  }
 };
 
 const makeProductionSmokeSection = async (
@@ -312,6 +347,7 @@ export const runReleaseReadiness = async (
   const sections = [
     makeRuntimeSection(env),
     await makeVercelProductionEnvSection(options),
+    await makeGitHubAppRuntimeSection({ ...options, env }),
     await makeProductionSmokeSection({ ...options, env }),
     await makeSupabaseLinkSection(options),
     await makeSupabaseMigrationSection(options),
@@ -377,6 +413,9 @@ export const runReleaseReadinessCheck = async (
     ...(options.execVercelEnvList === undefined
       ? {}
       : { execVercelEnvList: options.execVercelEnvList }),
+    ...(options.execGitHubAppRuntime === undefined
+      ? {}
+      : { execGitHubAppRuntime: options.execGitHubAppRuntime }),
     fetch: options.fetch,
     root: options.root,
     supabaseUrl: parsedArgs.supabaseUrl ?? options.supabaseUrl,
