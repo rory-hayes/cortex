@@ -17,6 +17,7 @@
     "supabase-link:check": "tsx scripts/check-supabase-link.ts",
     "supabase-migrations:check": "tsx scripts/check-supabase-migrations.ts",
     "supabase-smoke:check": "tsx scripts/check-supabase-smoke.ts",
+    "vercel-production-env:apply": "tsx scripts/apply-vercel-production-env.ts",
     "vercel-production-env:check": "tsx scripts/check-vercel-production-env.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit && pnpm -r --if-present --filter './apps/*' --filter './packages/*' run typecheck"

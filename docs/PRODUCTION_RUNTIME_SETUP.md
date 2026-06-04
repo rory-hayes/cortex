@@ -76,6 +76,12 @@ printing secret values:
   names against the required runtime set. The command prints only variable names and
   statuses, never environment values. Use `pnpm vercel-production-env:check --json` when
   automation needs structured output.
+- Run `pnpm vercel-production-env:apply --dry-run` after loading the remaining production
+  values in the current shell to preview which missing required Vercel production variables
+  would be applied. When the dry run is ready, run `pnpm vercel-production-env:apply` to
+  apply only missing required variables from the shell. The command refuses placeholders,
+  sends values to the Vercel CLI through stdin, and prints only variable names and statuses,
+  never environment values.
 - Run `pnpm production-runtime:check` in an environment that has the production values
   loaded. The command prints only variable names, statuses, and safe messages. Use
   `pnpm production-runtime:check --json` when automation needs structured output.
