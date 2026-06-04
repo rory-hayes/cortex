@@ -69,6 +69,28 @@ secrets, response bodies, local paths, and raw provider output.
 - Production build: `pnpm run build` passed; local build emitted expected Auth0 warnings because
   production Auth0 values were not loaded into the local shell for the build process.
 
+## Fresh Re-Audit
+
+June 4 continuation checks revalidated the current production state without printing secret
+values:
+
+- `pnpm vercel-production-env:check --json` confirms Vercel production has `WEB_BASE_URL`,
+  `APP_BASE_URL`, all required Auth0 variables, and `DATABASE_URL` configured. The only missing
+  required production variables are the GitHub App runtime set.
+- `pnpm production-smoke:check --url <deployed-app-url> --json` is ready: public route `200`,
+  sign-up Auth0 redirect `307`, and protected dashboard redirect `307`.
+- In-app browser smoke confirms the production landing page renders, sign-in links use
+  `returnTo=/dashboard`, sign-up links use `screen_hint=signup&returnTo=/dashboard`, sign-up
+  lands on the configured Auth0 tenant's `/u/signup`, and login lands on `/u/login`.
+- `pnpm release-readiness:check --app-url <deployed-app-url> --supabase-url <project-url> --json`
+  still reports Supabase link, Supabase migration history, Supabase endpoint smoke, and
+  production route smoke as ready. It blocks in the local shell because runtime secrets are not
+  exported there and because the GitHub App runtime variables are missing from Vercel production.
+- A temporary Vercel env pull produced no local key material on this machine, so direct database
+  verification was not rerun from pulled production values. The earlier credential-backed
+  `pnpm supabase-db:check --json` passed, and the fresh Vercel env-name check still confirms
+  `DATABASE_URL` is configured in production.
+
 ## Remaining Work
 
 - Configure `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY`, and `GITHUB_WEBHOOK_SECRET` in Vercel
