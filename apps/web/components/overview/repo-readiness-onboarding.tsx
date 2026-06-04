@@ -60,10 +60,10 @@ export function RepoReadinessOnboarding({
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3 border-b border-border pb-5 md:flex-row md:items-end md:justify-between">
+      <header className="rounded-lg border border-border bg-card p-5 md:p-6">
         <div>
           <p className="text-sm font-medium text-muted-foreground">Repo readiness</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-normal">
+          <h1 className="mt-1 text-3xl font-semibold tracking-normal">
             Start with a repository scan
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
@@ -71,13 +71,26 @@ export function RepoReadinessOnboarding({
             scan, and review AI-ready setup work before execution is paired.
           </p>
         </div>
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
-          Local execution boundary intact
+        <div className="mt-5 grid gap-3 border-t border-border pt-4 md:grid-cols-3">
+          <div>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">Scan mode</p>
+            <p className="mt-1 text-sm font-semibold">Metadata-only repo readiness</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">GitHub access</p>
+            <p className="mt-1 text-sm font-semibold">Scan-only before setup PRs</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">Execution</p>
+            <p className="mt-1 text-sm font-semibold text-emerald-800">
+              Local execution boundary intact
+            </p>
+          </div>
         </div>
       </header>
 
       <section
-        className="rounded-lg border border-border bg-card p-5"
+        className="rounded-lg border border-border bg-card p-5 shadow-sm"
         aria-labelledby="repo-readiness-onboarding"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -138,13 +151,13 @@ export function RepoReadinessOnboarding({
             />
             <fieldset className="grid gap-3">
               <legend className="text-sm font-medium">Select repository</legend>
-              <div className="grid overflow-hidden rounded-md border border-border">
+              <div className="grid overflow-hidden rounded-md border border-border bg-background/40">
                 {repositoryOptions.map((repository, index) => {
                   const isScannable = canScanRepository(repository);
 
                   return (
                     <label
-                      className="grid gap-3 border-b border-border p-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
+                      className="grid gap-3 border-b border-border bg-card p-4 transition-colors last:border-b-0 hover:bg-secondary/40 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
                       htmlFor={`repo-readiness-repo-${repository.id}`}
                       key={repository.id}
                     >

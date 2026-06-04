@@ -8,7 +8,7 @@ export default function AppLayout({
   children: ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#eef4ff_0,#f7f9fc_28rem)] text-foreground lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
       <AppNav />
       <main className="min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         <div className="mx-auto w-full max-w-7xl">{children}</div>

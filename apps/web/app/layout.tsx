@@ -3,8 +3,11 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AI Engineering Control Plane",
   description: "Local runner coordination and validated engineering workflow.",
+  icons: {
+    icon: "/icon.svg",
+  },
+  title: "AI Engineering Control Plane",
 };
 
 export default function RootLayout({

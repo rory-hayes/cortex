@@ -25,10 +25,10 @@ export function OverviewDashboard({ overview, workspaceName }: OverviewDashboard
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3 border-b border-border pb-5 md:flex-row md:items-end md:justify-between">
+      <header className="rounded-lg border border-border bg-card p-5 md:p-6">
         <div>
           <p className="text-sm font-medium text-muted-foreground">Overview</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-normal">
+          <h1 className="mt-1 max-w-4xl text-3xl font-semibold tracking-normal">
             What can safely move forward today?
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
@@ -36,8 +36,21 @@ export function OverviewDashboard({ overview, workspaceName }: OverviewDashboard
             one metadata-only view.
           </p>
         </div>
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
-          Local execution boundary intact
+        <div className="mt-5 grid gap-3 border-t border-border pt-4 md:grid-cols-3">
+          <div>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">Trust boundary</p>
+            <p className="mt-1 text-sm font-semibold text-emerald-800">
+              Local execution boundary intact
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">Hosted payloads</p>
+            <p className="mt-1 text-sm font-semibold">Metadata and review state only</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">Next decision</p>
+            <p className="mt-1 text-sm font-semibold">Review, approve, or repair work</p>
+          </div>
         </div>
       </header>
 

@@ -48,6 +48,25 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
+const APP_NAV_SECTIONS = [
+  {
+    items: APP_NAV_ITEMS.slice(0, 2),
+    label: "Command",
+  },
+  {
+    items: APP_NAV_ITEMS.slice(2, 7),
+    label: "Readiness",
+  },
+  {
+    items: APP_NAV_ITEMS.slice(7, 12),
+    label: "Execution",
+  },
+  {
+    items: APP_NAV_ITEMS.slice(12),
+    label: "Governance",
+  },
+] as const;
+
 const isActiveItem = (pathname: string, href: AppNavItem["href"]) => {
   if (href === "/dashboard") {
     return pathname === href;
@@ -63,46 +82,61 @@ export function AppNav() {
     <>
       <aside className="hidden min-h-screen border-r border-border bg-card px-5 py-6 lg:block">
         <Link
-          className="block rounded-md px-2 py-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="block rounded-md border border-border bg-background/70 px-3 py-3 outline-none transition hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
           href="/dashboard"
         >
           <span className="text-xs font-semibold uppercase tracking-normal text-muted-foreground">
             Control Plane
           </span>
-          <span className="mt-1 block text-xl font-semibold text-foreground">Cortex</span>
+          <span className="mt-1 flex items-center gap-2 text-xl font-semibold text-foreground">
+            <span className="grid size-7 place-items-center rounded-md bg-primary text-sm text-primary-foreground">
+              C
+            </span>
+            Cortex
+          </span>
         </Link>
 
-        <nav aria-label="Primary" className="mt-8 flex flex-col gap-1">
-          {APP_NAV_ITEMS.map((item) => {
-            const active = isActiveItem(pathname, item.href);
-            const Icon = item.icon;
+        <nav aria-label="Primary" className="mt-7 flex flex-col gap-6">
+          {APP_NAV_SECTIONS.map((section) => (
+            <div className="grid gap-1" key={section.label}>
+              <p className="px-3 text-[0.68rem] font-semibold uppercase text-muted-foreground">
+                {section.label}
+              </p>
+              {section.items.map((item) => {
+                const active = isActiveItem(pathname, item.href);
+                const Icon = item.icon;
 
-            return (
-              <Link
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                  active
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-secondary hover:text-foreground",
-                )}
-                href={item.href}
-                key={item.href}
-              >
-                <Icon aria-hidden="true" className="size-4" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+                return (
+                  <Link
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                      active
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "hover:bg-secondary hover:text-foreground",
+                    )}
+                    href={item.href}
+                    key={item.href}
+                  >
+                    <Icon aria-hidden="true" className="size-4" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
       </aside>
 
       <div className="border-b border-border bg-card px-4 py-3 lg:hidden">
         <div className="flex items-center justify-between gap-4">
           <Link
-            className="text-base font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex items-center gap-2 text-base font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring"
             href="/dashboard"
           >
+            <span className="grid size-7 place-items-center rounded-md bg-primary text-sm text-primary-foreground">
+              C
+            </span>
             Cortex
           </Link>
           <span className="text-xs font-medium text-muted-foreground">Control Plane</span>

@@ -10,9 +10,10 @@ type EmptyStateProps = {
 
 export function EmptyState({ title, description }: EmptyStateProps) {
   return (
-    <section className="rounded-lg border border-border bg-card p-6">
+    <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
       <div className="max-w-2xl">
-        <h2 className="text-lg font-semibold tracking-normal">{title}</h2>
+        <div className="mb-4 h-1.5 w-12 rounded-full bg-primary" />
+        <h2 className="text-xl font-semibold tracking-normal">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
       </div>
       <div className="mt-5 flex flex-wrap gap-2">

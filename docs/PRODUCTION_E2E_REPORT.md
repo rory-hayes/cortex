@@ -37,6 +37,9 @@ secrets, response bodies, local paths, and raw provider output.
 - Added `pnpm github-app:check` and wired GitHub App runtime identity verification into the
   combined release-readiness gate without printing private keys, JWTs, webhook secrets, raw
   GitHub errors, or response bodies.
+- Added an operational-control-room UI polish pass covering the public landing page, app
+  navigation shell, dashboard overview, repo-readiness onboarding, shared empty states, outline
+  button treatment, and app icon metadata.
 - Applied `DATABASE_URL` to Vercel production through the safe env helper, sending the value
   through stdin and printing only key names/statuses.
 - Updated production runtime documentation, release notes, README, SPRINT, and BACKLOG status.
@@ -56,6 +59,9 @@ secrets, response bodies, local paths, and raw provider output.
 - Browser smoke: the production homepage renders as `AI Engineering Control Plane`, exposes
   sign-in/sign-up links, and the sign-up path redirects to the configured Auth0 tenant's signup
   screen. The dashboard return target is validated by the HTTP smoke check.
+- Local browser polish smoke: the redesigned public entry renders the code-native Cortex control
+  loop preview at desktop and mobile widths, preserves sign-in/sign-up dashboard return targets,
+  and no longer emits the missing favicon browser error in local development.
 - Combined release-readiness gate: includes the GitHub App runtime identity section and is
   blocked only by required GitHub App runtime credentials, with optional Linear warnings.
 - Repository validation: `pnpm run typecheck`, `pnpm run lint`, `pnpm run format:check`, and

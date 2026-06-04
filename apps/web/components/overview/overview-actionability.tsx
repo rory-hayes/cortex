@@ -11,10 +11,10 @@ type OverviewActionabilityProps = {
 };
 
 const toneClasses = {
-  danger: "border-l-destructive bg-destructive/5",
-  neutral: "border-l-border bg-muted/20",
-  success: "border-l-emerald-500 bg-emerald-50/70",
-  warning: "border-l-amber-500 bg-amber-50/70",
+  danger: "border-l-destructive bg-destructive/5 hover:bg-destructive/10",
+  neutral: "border-l-border bg-muted/20 hover:bg-muted/40",
+  success: "border-l-emerald-500 bg-emerald-50/70 hover:bg-emerald-50",
+  warning: "border-l-amber-500 bg-amber-50/70 hover:bg-amber-50",
 } satisfies Record<WorkspaceDashboardOverview["actionability"]["items"][number]["tone"], string>;
 
 const toneBadgeVariants = {
@@ -31,7 +31,7 @@ export function OverviewActionability({ actionability }: OverviewActionabilityPr
   return (
     <section
       aria-labelledby="overview-actionability"
-      className="rounded-lg border border-border bg-card p-5"
+      className="rounded-lg border border-border bg-card p-5 shadow-sm"
     >
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
@@ -52,13 +52,13 @@ export function OverviewActionability({ actionability }: OverviewActionabilityPr
       <div className="mt-5 grid gap-3 lg:grid-cols-2">
         {actionability.items.map((item) => (
           <article
-            className={`flex min-w-0 flex-col gap-4 border-l-4 px-4 py-3 md:flex-row md:items-center md:justify-between ${toneClasses[item.tone]}`}
+            className={`flex min-w-0 flex-col gap-4 border-l-4 px-4 py-4 transition-colors md:flex-row md:items-center md:justify-between ${toneClasses[item.tone]}`}
             key={item.id}
           >
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={toneBadgeVariants[item.tone]}>{item.label}</Badge>
-                <span className="text-sm font-semibold">{item.count}</span>
+                <span className="text-sm font-semibold">{item.count} items</span>
               </div>
               <h3 className="mt-3 text-base font-semibold tracking-normal">{item.title}</h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p>
@@ -66,6 +66,7 @@ export function OverviewActionability({ actionability }: OverviewActionabilityPr
             <Button asChild size="sm" variant="outline">
               <Link aria-label={item.title} href={item.href}>
                 <ArrowRight aria-hidden="true" />
+                <span className="sr-only">Open {item.title}</span>
               </Link>
             </Button>
           </article>
