@@ -208,9 +208,13 @@ const buildSignUpRouteCheck = async (fetchFn: FetchFunction, baseUrl: URL): Prom
   if (response.status >= 300 && response.status < 400) {
     const location = response.headers.get("location") ?? "";
 
-    if (location.includes("/auth/login") && location.includes("screen_hint=signup")) {
+    if (
+      location.includes("/auth/login") &&
+      location.includes("screen_hint=signup") &&
+      location.includes("returnTo=%2Fdashboard")
+    ) {
       return {
-        message: "Sign-up route redirects to Auth0 signup.",
+        message: "Sign-up route redirects to Auth0 signup with dashboard return.",
         name: "sign_up_route",
         status: "passed",
         statusCode: response.status,
@@ -218,7 +222,7 @@ const buildSignUpRouteCheck = async (fetchFn: FetchFunction, baseUrl: URL): Prom
     }
 
     return {
-      message: "Sign-up route redirects, but not to the Auth0 signup flow.",
+      message: "Sign-up route redirects, but not to the Auth0 signup flow with dashboard return.",
       name: "sign_up_route",
       status: "blocked",
       statusCode: response.status,

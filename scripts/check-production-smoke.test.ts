@@ -47,7 +47,7 @@ describe("production smoke check command", () => {
 
         if (String(url).endsWith("/sign-up")) {
           return createResponse(307, "", {
-            location: "/auth/login?screen_hint=signup",
+            location: "/auth/login?screen_hint=signup&returnTo=%2Fdashboard",
           });
         }
 
@@ -76,7 +76,7 @@ describe("production smoke check command", () => {
 
         if (String(url).endsWith("/sign-up")) {
           return createResponse(302, "", {
-            location: "/auth/login?screen_hint=signup",
+            location: "/auth/login?screen_hint=signup&returnTo=%2Fdashboard",
           });
         }
 
@@ -91,7 +91,7 @@ describe("production smoke check command", () => {
     expect(result.checks).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          message: "Sign-up route redirects to Auth0 signup.",
+          message: "Sign-up route redirects to Auth0 signup with dashboard return.",
           name: "sign_up_route",
           status: "passed",
           statusCode: 302,

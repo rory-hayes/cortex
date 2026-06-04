@@ -116,7 +116,7 @@ describe("release readiness check command", () => {
 
         if (requestUrl.endsWith("/sign-up")) {
           return createResponse(307, "", {
-            location: "/auth/login?screen_hint=signup",
+            location: "/auth/login?screen_hint=signup&returnTo=%2Fdashboard",
           });
         }
 
@@ -229,7 +229,7 @@ describe("release readiness check command", () => {
 
         if (requestUrl.endsWith("/sign-up")) {
           return createResponse(307, "", {
-            location: "/auth/login?screen_hint=signup",
+            location: "/auth/login?screen_hint=signup&returnTo=%2Fdashboard",
           });
         }
 

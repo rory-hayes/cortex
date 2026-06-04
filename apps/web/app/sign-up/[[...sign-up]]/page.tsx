@@ -4,7 +4,7 @@ import { AuthPageFallback, hasAuth0RuntimeConfig } from "../../auth-runtime";
 
 export default function SignUpPage() {
   if (hasAuth0RuntimeConfig()) {
-    redirect("/auth/login?screen_hint=signup");
+    redirect("/auth/login?screen_hint=signup&returnTo=%2Fdashboard");
   }
 
   return <AuthPageFallback mode="sign-up" />;

@@ -17,11 +17,13 @@ describe("Auth0 auth shell", () => {
     const signUpSource = await readAppFile("./sign-up/[[...sign-up]]/page.tsx");
 
     expect(signInSource).toContain('import { redirect } from "next/navigation";');
-    expect(signInSource).toContain('redirect("/auth/login")');
+    expect(signInSource).toContain('redirect("/auth/login?returnTo=%2Fdashboard")');
     expect(signInSource).toContain("AuthPageFallback");
     expect(signInSource).toContain('mode="sign-in"');
     expect(signUpSource).toContain('import { redirect } from "next/navigation";');
-    expect(signUpSource).toContain('redirect("/auth/login?screen_hint=signup")');
+    expect(signUpSource).toContain(
+      'redirect("/auth/login?screen_hint=signup&returnTo=%2Fdashboard")',
+    );
     expect(signUpSource).toContain("AuthPageFallback");
     expect(signUpSource).toContain('mode="sign-up"');
   });
@@ -52,7 +54,8 @@ describe("Auth0 auth shell", () => {
     const source = await readAppFile("../lib/auth0.ts");
 
     expect(source).toContain('import { Auth0Client } from "@auth0/nextjs-auth0/server";');
-    expect(source).toContain("export const auth0 = new Auth0Client()");
+    expect(source).toContain("export const auth0 = new Auth0Client({");
+    expect(source).toContain('signInReturnToPath: "/dashboard"');
   });
 
   test("runs Auth0 middleware through the Next proxy", async () => {
