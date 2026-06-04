@@ -35,6 +35,18 @@ Cortex currently uses Supabase as Postgres through server-side `DATABASE_URL`.
 The web app does not require Supabase publishable keys or secret keys in browser-visible
 environment variables for the MVP runtime.
 
+The Supabase REST URL and API keys cannot be used to recover or replace `DATABASE_URL`.
+They can verify project API reachability, but authenticated dashboard/database work still
+requires a Postgres connection string with the real database password. For an existing
+Supabase project, get the connection string from the Dashboard Connect panel and reset the
+database password in Database Settings if the current password is unknown.
+
+Supabase anon or publishable keys are browser-visible API keys for public REST/Auth flows.
+Supabase service-role keys are privileged server-only REST keys and must never be exposed
+through `NEXT_PUBLIC_*`, client bundles, screenshots, or logs. The current MVP runtime does
+not require a service-role key because repository scanning and dashboard persistence use
+server-side Postgres through `DATABASE_URL`, not Supabase REST writes.
+
 Local Supabase link can be created without committing or storing the remote database password
 in the repository. Linked migration history can be checked as safe version ids, but direct
 database verification and applying canonical package migrations still require the remote

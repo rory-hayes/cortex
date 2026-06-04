@@ -18,6 +18,7 @@ const prohibitedCredentialMarkers = [
 describe("production runtime setup documentation", () => {
   test("documents required production runtime variables without secret values", () => {
     const docs = readRepoFile("docs/PRODUCTION_RUNTIME_SETUP.md");
+    const normalizedDocs = docs.replace(/\s+/g, " ");
 
     for (const key of [
       "WEB_BASE_URL",
@@ -35,6 +36,12 @@ describe("production runtime setup documentation", () => {
     }
 
     expect(docs).toContain("Supabase as Postgres through server-side `DATABASE_URL`");
+    expect(docs).toContain("The Supabase REST URL and API keys cannot be used");
+    expect(docs).toContain("Dashboard Connect panel");
+    expect(docs).toContain("Database Settings");
+    expect(docs).toContain("anon or publishable keys are browser-visible API keys");
+    expect(docs).toContain("service-role keys are privileged server-only REST keys");
+    expect(normalizedDocs).toContain("does not require a service-role key");
     expect(docs).toContain("Local Supabase link can be created");
     expect(docs).toContain("Linked migration history can be checked as safe version ids");
     expect(docs).toContain("database verification and applying canonical package migrations");
